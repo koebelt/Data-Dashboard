@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'AppBar.dart';
+import 'DeviceIcon.dart';
 import 'Dashboard.dart';
 import 'DashboardItem.dart';
 
@@ -15,6 +15,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Data Dashboard',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
         useMaterial3: true,
@@ -44,7 +45,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return const Scaffold(
-      floatingActionButton: MyAppBar(),
+      floatingActionButton: DeviceIcon(),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
 
       body: Padding(

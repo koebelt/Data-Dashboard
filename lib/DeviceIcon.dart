@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:quick_blue/quick_blue.dart';
 
-class MyAppBar extends StatefulWidget {
-  const MyAppBar({super.key});
+class DeviceIcon extends StatefulWidget {
+  const DeviceIcon({super.key});
 
   @override
-  State<MyAppBar> createState() => _MyAppBarState();
+  State<DeviceIcon> createState() => _DeviceIconState();
 }
 
-class _MyAppBarState extends State<MyAppBar> {
+class _DeviceIconState extends State<DeviceIcon> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -15,7 +16,9 @@ class _MyAppBarState extends State<MyAppBar> {
       child: FloatingActionButton(
         backgroundColor: Colors.white,
         child: Container(),
-        onPressed: () => {},
+        onPressed: () => {
+          
+        },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(40.0),
         ),
