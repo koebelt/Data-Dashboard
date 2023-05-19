@@ -1,4 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:label="data_dashboard"
         android:name="${applicationName}"
@@ -29,5 +34,14 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+    <!-- <uses-feature android:name="android.hardware.location.gps" />
+    <uses-feature android:name="android.hardware.location.network" /> -->
+
+    <service
+        android:name="com.polidea.flutter_ble_lib.BackgroundLocationPermissionRequester"
+        android:permission="android.permission.BIND_JOB_SERVICE"
+        android:exported="false" />
+
     </application>
 </manifest>

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quick_blue/quick_blue.dart';
+import 'DeviceConnection.dart';
 
 class DeviceIcon extends StatefulWidget {
   const DeviceIcon({super.key});
@@ -17,7 +17,7 @@ class _DeviceIconState extends State<DeviceIcon> {
         backgroundColor: Colors.white,
         child: Container(),
         onPressed: () => {
-          
+          Navigator.of(context).push(_createRoute())
         },
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(40.0),
@@ -25,4 +25,23 @@ class _DeviceIconState extends State<DeviceIcon> {
       ),
     );
   }
+}
+
+
+Route _createRoute() {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => const DeviceConnection(),
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.0, 1.0);
+      const end = Offset.zero;
+      const curve = Curves.ease;
+
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }
