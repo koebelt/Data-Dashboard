@@ -1,3 +1,6 @@
+import 'dart:math';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'BluetoothDeviceConnection.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -12,6 +15,39 @@ class DeviceConnection extends StatefulWidget {
 }
 
 class _DeviceConnectionState extends State<DeviceConnection> {
+  FlutterBluePlus? _flutterBlue;
+  bool _isBluetoothSupported = false;
+  StreamSubscription<BluetoothState>? _stateSubscription;
+  BluetoothState _bluetoothState = BluetoothState.unknown;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkBluetoothSupport();
+  }
+
+  Future<void> _checkBluetoothSupport() async {
+    if (!Platform.isAndroid && !Platform.isIOS) {
+      setState(() {
+        _isBluetoothSupported = false;
+      });
+    } else {
+      _flutterBlue = FlutterBluePlus.instance;
+      bool isAvailable = await _flutterBlue!.isAvailable;
+      setState(() {
+        _isBluetoothSupported = isAvailable;
+      });
+
+      if (isAvailable) {
+        _stateSubscription = _flutterBlue!.state.listen((state) {
+          setState(() {
+            _bluetoothState = state;
+          });
+        });
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,11 +57,28 @@ class _DeviceConnectionState extends State<DeviceConnection> {
       body: Column(
         children: [
           Text('Bluetooth'),
-          Container(
-            height: 400,
-            child: BluetoothDeviceConnection(),
-
-          ),
+          if (!_isBluetoothSupported)
+            Text('Bluetooth is not available on this device')
+          else if (_bluetoothState == BluetoothState.on)
+            Container(
+              height: 400,
+              child: BluetoothDeviceConnection(),
+            )
+          else if (_bluetoothState == BluetoothState.off)
+            Container(
+                child: Row(
+              children: [
+                Text('Bluetooth is off'),
+                ElevatedButton(
+                  onPressed: () {
+                    _flutterBlue!.turnOn();
+                  },
+                  child: Text('Turn on'),
+                ),
+              ],
+            ))
+          else
+            Text('Bluetooth state unknown, permission might be missing'),
           Text('Serial'),
         ],
       ),
