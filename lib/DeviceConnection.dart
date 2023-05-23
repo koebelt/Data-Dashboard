@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'BluetoothDeviceConnection.dart';
+import 'SerialDeviceConnection.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'dart:async';
@@ -17,6 +18,7 @@ class DeviceConnection extends StatefulWidget {
 class _DeviceConnectionState extends State<DeviceConnection> {
   FlutterBluePlus? _flutterBlue;
   bool _isBluetoothSupported = false;
+  bool _isSerialSupported = false;
   StreamSubscription<BluetoothState>? _stateSubscription;
   BluetoothState _bluetoothState = BluetoothState.unknown;
 
@@ -24,6 +26,7 @@ class _DeviceConnectionState extends State<DeviceConnection> {
   void initState() {
     super.initState();
     _checkBluetoothSupport();
+    _chechSerialSupport();
   }
 
   Future<void> _checkBluetoothSupport() async {
@@ -45,6 +48,18 @@ class _DeviceConnectionState extends State<DeviceConnection> {
           });
         });
       }
+    }
+  }
+
+  void _chechSerialSupport() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      setState(() {
+        _isSerialSupported = false;
+      });
+    } else {
+      setState(() {
+        _isSerialSupported = true;
+      });
     }
   }
 
@@ -80,6 +95,13 @@ class _DeviceConnectionState extends State<DeviceConnection> {
           else
             Text('Bluetooth state unknown, permission might be missing'),
           Text('Serial'),
+          if (!_isSerialSupported)
+            Text('Serial is not available on this device')
+          else
+          Container(
+            height: 400,
+            child: SerialDeviceConnection(),
+          )
         ],
       ),
     );

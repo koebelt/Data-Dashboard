@@ -37,6 +37,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_blue_plus: ^1.4.0
   libserialport: ^0.3.0+1
+  flutter_libserialport:
+    path: local_dependencies/flutter_libserialport-main
 
 dev_dependencies:
   flutter_test:

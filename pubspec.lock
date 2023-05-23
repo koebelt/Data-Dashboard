@@ -90,10 +90,17 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_blue_plus
-      sha256: fd7740fa96d728229a147d3978a28f1a7b94025a4098b8ce5f0aea6cfcab1bb6
+      sha256: a977e90b7f9dcece90a95a287f8843e3b9028a61199c41bc279832c096d31d43
       url: "https://pub.dev"
     source: hosted
-    version: "1.5.1"
+    version: "1.5.2"
+  flutter_libserialport:
+    dependency: "direct main"
+    description:
+      path: "local_dependencies/flutter_libserialport-main"
+      relative: true
+    source: path
+    version: "0.2.3"
   flutter_lints:
     dependency: "direct dev"
     description:
