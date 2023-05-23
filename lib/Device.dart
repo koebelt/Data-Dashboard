@@ -22,13 +22,17 @@ class SerialDevice extends Device {
   String _portAddress;
   int _baudrate;
 
-  SerialDevice(this._portAddress, this._baudrate);
+  SerialDevice(this._portAddress, this._baudrate) {
+    SerialPort.availablePorts;
+    _serialPort = SerialPort(_portAddress);
+    // _serialPort.config.baudRate = _baudrate;
+  }
 
   @override
   Future<void> connect() async {
     try {
-      _serialPort = SerialPort(_portAddress);
-      _serialPort.config.baudRate = _baudrate;
+      print("Connecting to the serial device...");
+
       _serialPort.openReadWrite();
     } catch (e) {
       print("Failed to connect to the serial device: $e");
@@ -100,6 +104,7 @@ class DeviceReader {
         Uint8List newData = _device.readData(); // Read one byte at a time
         receivedData += String.fromCharCodes(newData);
       }
+      print(receivedData);
       _dataStreamController.add(receivedData);
     }
   }
