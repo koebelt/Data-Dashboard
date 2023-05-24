@@ -39,6 +39,7 @@ dependencies:
   libserialport: ^0.3.0+1
   flutter_libserialport:
     path: local_dependencies/flutter_libserialport-main
+  syncfusion_flutter_charts: ^21.2.6
 
 dev_dependencies:
   flutter_test:
