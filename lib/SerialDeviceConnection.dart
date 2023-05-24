@@ -5,7 +5,11 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'Device.dart';
 
 class SerialDeviceConnection extends StatefulWidget {
-  const SerialDeviceConnection({super.key});
+  const SerialDeviceConnection(
+      {super.key, required this.device, required this.setDevice});
+
+  final Device? device;
+  final Function(Device?) setDevice;
 
   @override
   State<SerialDeviceConnection> createState() => _SerialDeviceConnectionState();
@@ -56,18 +60,36 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
                     child: Text('Connect'),
                     onPressed: () async {
                       print(address);
-                      Device device =
-                          SerialDevice(address, baudRate);
-                      DeviceReader deviceReader = DeviceReader(device);
-                      device.connect().then((_) {
-                        // Start reading data
-                        deviceReader.startReading();
-                      });
+                      widget.setDevice(SerialDevice(address, baudRate));
                     },
                   ),
                 ],
               );
             }),
+          // if (device != null)
+          //   StreamBuilder<String>(
+          //     stream: reader,
+          //     builder: (context, snapshot) {
+          //       if (snapshot.hasError) {
+          //         return Text('Error: ${snapshot.error}');
+          //       }
+          //       if (snapshot.connectionState == ConnectionState.waiting) {
+          //         return const Text('Awaiting result...');
+          //       }
+          //       return Column(
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: <Widget>[
+          //           const Text(
+          //             'Counter from Arduino:',
+          //           ),
+          //           Text(
+          //             snapshot.data!,
+          //             style: Theme.of(context).textTheme.headline1,
+          //           ),
+          //         ],
+          //       );
+          //     },
+          //   ),
         ],
       ),
     );

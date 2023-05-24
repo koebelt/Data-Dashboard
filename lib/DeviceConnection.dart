@@ -7,9 +7,13 @@ import 'SerialDeviceConnection.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'dart:async';
+import 'Device.dart';
 
 class DeviceConnection extends StatefulWidget {
-  const DeviceConnection({super.key});
+  const DeviceConnection({super.key, required this.device, required this.setDevice});
+
+  final Device? device;
+  final Function(Device?) setDevice;
 
   @override
   State<DeviceConnection> createState() => _DeviceConnectionState();
@@ -100,7 +104,7 @@ class _DeviceConnectionState extends State<DeviceConnection> {
           else
           Container(
             height: 400,
-            child: SerialDeviceConnection(),
+            child: SerialDeviceConnection(device: widget.device, setDevice: widget.setDevice),
           )
         ],
       ),

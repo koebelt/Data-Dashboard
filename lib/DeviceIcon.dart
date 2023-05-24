@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'DeviceConnection.dart';
+import 'Device.dart';
 
 class DeviceIcon extends StatefulWidget {
-  const DeviceIcon({super.key});
+  const DeviceIcon({super.key, required this.device, required this.setDevice});
+
+  final Device? device;
+  final Function(Device?) setDevice;
 
   @override
   State<DeviceIcon> createState() => _DeviceIconState();
@@ -25,23 +29,24 @@ class _DeviceIconState extends State<DeviceIcon> {
       ),
     );
   }
+
+  Route _createRoute() {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => DeviceConnection(device: widget.device, setDevice: widget.setDevice),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        const begin = Offset(0.0, 1.0);
+        const end = Offset.zero;
+        const curve = Curves.ease;
+
+        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    );
+  }
 }
 
 
-Route _createRoute() {
-  return PageRouteBuilder(
-    pageBuilder: (context, animation, secondaryAnimation) => const DeviceConnection(),
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(0.0, 1.0);
-      const end = Offset.zero;
-      const curve = Curves.ease;
-
-      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-
-      return SlideTransition(
-        position: animation.drive(tween),
-        child: child,
-      );
-    },
-  );
-}

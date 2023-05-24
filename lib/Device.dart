@@ -11,7 +11,7 @@ abstract class Device {
   Future<void> disconnect();
 
   // Abstract method to read data from the device
-  Uint8List readData();
+  Stream<String> readData();
 
   // Abstract method to write data to the device
   void writeData(Uint8List data);
@@ -34,6 +34,10 @@ class SerialDevice extends Device {
 
       _serialPort.openReadWrite();
       _serialPort.config.baudRate = _baudrate;
+      _serialPort.config.bits = 8;
+      _serialPort.config.stopBits = 1;
+
+      print(_serialPort.config.baudRate);
     } catch (e) {
       print("Failed to connect to the serial device: $e");
     }
@@ -49,15 +53,16 @@ class SerialDevice extends Device {
   }
 
   @override
-  Uint8List readData() {
+  Stream<String> readData() {
     try {
-      if (_serialPort.isOpen) {
-        return _serialPort.read(1);
-      }
+      SerialPortReader reader = SerialPortReader(_serialPort);
+      return reader.stream.map((event) => 
+        String.fromCharCodes(event).split('\n')[1]
+      );
     } catch (e) {
       print("Failed to read data from the serial device: $e");
     }
-    return Uint8List(0);
+    return Stream.empty();
   }
 
   @override
@@ -72,40 +77,40 @@ class SerialDevice extends Device {
   }
 }
 
-class DeviceReader {
-  // Define a stream controller to emit the received data
-  final StreamController<String> _dataStreamController =
-      StreamController<String>();
-  Stream<String> get dataStream => _dataStreamController.stream;
+// class DeviceReader {
+//   // Define a stream controller to emit the received data
+//   final StreamController<String> _dataStreamController =
+//       StreamController<String>();
+//   Stream<String> get dataStream => _dataStreamController.stream;
 
-  // Instance variables
-  Device _device;
-  bool _isReading = false;
+//   // Instance variables
+//   Device _device;
+//   bool _isReading = false;
 
-  // Constructor
-  DeviceReader(this._device);
+//   // Constructor
+//   DeviceReader(this._device);
 
-  // Start reading data
-  void startReading() {
-    _isReading = true;
-    _readData();
-  }
+//   // Start reading data
+//   void startReading() {
+//     _isReading = true;
+//     _readData();
+//   }
 
-  // Stop reading data
-  void stopReading() {
-    _isReading = false;
-  }
+//   // Stop reading data
+//   void stopReading() {
+//     _isReading = false;
+//   }
 
-  // Read data from the device
-  void _readData() {
-    while (_isReading) {
-      String receivedData = '';
-      while (!receivedData.contains('\n')) {
-        Uint8List newData = _device.readData(); // Read one byte at a time
-        receivedData += String.fromCharCodes(newData);
-      }
-      print(receivedData);
-      _dataStreamController.add(receivedData);
-    }
-  }
-}
+//   // Read data from the device
+//   void _readData() {
+//     while (_isReading) {
+//       String receivedData = '';
+//       while (!receivedData.contains('\n')) {
+//         Uint8List newData = _device.readData(); // Read one byte at a time
+//         receivedData += String.fromCharCodes(newData);
+//       }
+//       print(receivedData);
+//       _dataStreamController.add(receivedData);
+//     }
+//   }
+// }
