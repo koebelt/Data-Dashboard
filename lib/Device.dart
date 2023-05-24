@@ -25,7 +25,6 @@ class SerialDevice extends Device {
   SerialDevice(this._portAddress, this._baudrate) {
     SerialPort.availablePorts;
     _serialPort = SerialPort(_portAddress);
-    // _serialPort.config.baudRate = _baudrate;
   }
 
   @override
@@ -34,6 +33,7 @@ class SerialDevice extends Device {
       print("Connecting to the serial device...");
 
       _serialPort.openReadWrite();
+      _serialPort.config.baudRate = _baudrate;
     } catch (e) {
       print("Failed to connect to the serial device: $e");
     }
