@@ -30,7 +30,7 @@ class _DashboardItemState extends State<DashboardItem> {
         ),
         child: Padding(
           padding: EdgeInsets.all(5),
-          child: Wrap(
+          child: Column(
             children: [
               Text(widget.title),
               widget.child,

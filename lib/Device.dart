@@ -56,9 +56,7 @@ class SerialDevice extends Device {
   Stream<String> readData() {
     try {
       SerialPortReader reader = SerialPortReader(_serialPort);
-      return reader.stream.map((event) => 
-        String.fromCharCodes(event).split('\n')[1]
-      );
+      return reader.stream.map((event) => String.fromCharCodes(event).split('\n').length > 1 ? String.fromCharCodes(event).split('\n')[1] : "0");
     } catch (e) {
       print("Failed to read data from the serial device: $e");
     }
