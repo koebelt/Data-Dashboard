@@ -1,7 +1,12 @@
+import 'dart:ffi';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'DeviceIcon.dart';
-import 'Dashboard.dart';
-import 'DashboardItem.dart';
+import 'Device.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:dashboard/dashboard.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,27 +40,275 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  Device? device;
+  Stream<String>? dataStream;
+  List<Data> data = [];
+  List<Data> visibleData = [];
+  List<FlSpot> spots = [];
+  double initialTime = DateTime.now().millisecondsSinceEpoch / 1000;
+
+  setDevice(Device? device) {
+    setState(() {
+      this.device = device;
+      if (this.device == null) {
+        Navigator.pop(context);
+        return;
+      }
+      this.device!.connect().then((_) {
+        this.dataStream = device?.readData();
+        initialTime = DateTime.now().millisecondsSinceEpoch / 1000;
+        Navigator.pop(context);
+      });
+    });
+  }
+
+  int? slot;
+
+  setSlot() {
+    var w = MediaQuery.of(context).size.width;
+    setState(() {
+      slot = w > 600
+          ? w > 900
+              ? 8
+              : 6
+          : 4;
+    });
+  }
+
+  late DashboardItemController itemController = DashboardItemController(
+    items: [
+      DashboardItem(
+          startY: 0, startX: 0, width: 3, height: 3, identifier: "id_1"),
+      DashboardItem(
+          startY: 0, startX: 3, width: 3, height: 3, identifier: "id_2"),
+    ],
+  );
+
+  Future<void> init() async {
+    await Future.delayed(const Duration(seconds: 1));
+    itemController.isEditing = true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return const Scaffold(
-      floatingActionButton: DeviceIcon(),
+    var w = MediaQuery.of(context).size.width;
+    slot = w > 300
+        ? w > 600
+            ? w > 900
+                ? w > 1200
+                    ? 10
+                    : 8
+                : 6
+            : 4
+        : 3;
+    return Scaffold(
+      // appBar: AppBar(
+      //   actions: [
+      //     IconButton(
+      //       onPressed: () {
+      //         itemController.isEditing = !itemController.isEditing;
+      //       },
+      //       icon: Icon(
+      //         itemController.isEditing
+      //             ? Icons.check_box
+      //             : Icons.check_box_outline_blank,
+      //       ),
+      //     ),
+      //   ],
+      // ),
+      floatingActionButton: DeviceIcon(device: device, setDevice: setDevice),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
-
       body: Padding(
-        padding: EdgeInsets.only(top: 100),
-        child: Dashboard(childrens: [
-          DashboardItem(title: "Roll", child: Text("1234567890")),
-          DashboardItem(title: "Name", child: Text("John Doe")),
-          DashboardItem(title: "Class", child: Text("XII")),
-        ]),
-      ) 
+        padding: EdgeInsets.all(0),
+        child: StreamBuilder<String>(
+          stream: dataStream,
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            }
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Text('Awaiting result...');
+            }
+            if (snapshot.data != null) {
+              this.data.add(Data(double.parse(snapshot.data!), initialTime));
+              this
+                  .visibleData
+                  .add(Data(double.parse(snapshot.data!), initialTime));
+              this.spots.add(FlSpot(
+                  (DateTime.now().millisecondsSinceEpoch / 1000 - initialTime)
+                      .toDouble(),
+                  double.parse(snapshot.data!)));
+            }
+            if (this.visibleData.length > 400) {
+              this.visibleData.removeAt(0);
+            }
+            if (this.spots.length > 400) {
+              this.spots.removeAt(0);
+            }
+
+            return Dashboard(
+              padding: EdgeInsets.all(50),
+              dashboardItemController: itemController,
+              itemBuilder: (item) {
+                switch (item.identifier) {
+                  case "id_1":
+                    return SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        title: AxisTitle(text: 'Time (s)'),
+                      ),
+                      tooltipBehavior: TooltipBehavior(enable: true),
+                      series: <ChartSeries<Data, String>>[
+                        LineSeries<Data, String>(
+                          dataSource: this.visibleData,
+                          xValueMapper: (Data data, _) => data.time.toString(),
+                          yValueMapper: (Data data, _) => data.value,
+                        )
+                      ],
+                    );
+                  case "id_2":
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          left: 10, bottom: 20, top: 20, right: 20),
+                      child: LineChart(
+                        LineChartData(
+                          lineTouchData: LineTouchData(enabled: false),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: spots,
+                              isCurved: true,
+                              isStrokeCapRound: true,
+                              barWidth: 3,
+                              dotData: FlDotData(show: false),
+                            ),
+                          ],
+                          titlesData: FlTitlesData(
+                            show: true,
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                              ),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              axisNameWidget: Text(
+                                'Time (s)',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              axisNameSize: 20,
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 30,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+
+                  default:
+                    return Text(item.identifier);
+                }
+                //return widget
+              },
+              slotCount: slot!,
+              itemStyle: ItemStyle(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  shadowColor: Colors.black,
+                  animationDuration: const Duration(milliseconds: 200),
+                  borderOnForeground: false,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  elevation: 10,
+                  textStyle: const TextStyle(color: Colors.black),
+                  type: MaterialType.card),
+              slideToTop: false,
+              editModeSettings: EditModeSettings(
+                  curve: Curves.easeInOutCirc,
+                  duration: const Duration(milliseconds: 200),
+                  fillEditingBackground: true,
+                  resizeCursorSide: 20,
+                  shrinkOnMove: false,
+                  longPressEnabled: true,
+                  panEnabled: true,
+                  backgroundStyle: const EditModeBackgroundStyle(
+                      fillColor: Color.fromARGB(10, 10, 10, 10),
+                      lineWidth: 0,
+                      lineColor: Colors.transparent,
+
+                      // line by vertical space
+                      dualLineHorizontal: false,
+
+                      // line by horizontal space
+                      dualLineVertical: false)),
+            );
+            // return Dashboard(childrens: [
+            //   DashboardItem(
+            //     title: "Roll",
+            //     child: SfCartesianChart(
+            //       primaryXAxis: CategoryAxis(
+            //         title: AxisTitle(text: 'Time (s)'),
+            //         visibleMinimum: 0,
+            //         visibleMaximum: 400,
+            //       ),
+            //       tooltipBehavior: TooltipBehavior(enable: true),
+            //       series: <ChartSeries<Data, String>>[
+            //         LineSeries<Data, String>(
+            //           dataSource: this.visibleData,
+            //           xValueMapper: (Data data, _) => data.time.toString(),
+            //           yValueMapper: (Data data, _) => data.value,
+            //           // Enable data label
+            //           // dataLabelSettings:
+            //           //     DataLabelSettings(isVisible: true)
+            //         )
+            //       ],
+            //     ),
+            //   ),
+            //   DashboardItem (
+            //     title: "Pitch",
+            //     child: Container (height: 500,
+            //       width: 500,
+            //       child: LineChart(
+            //         LineChartData(
+            //           lineTouchData: LineTouchData(enabled: false),
+            //           lineBarsData: [
+            //             LineChartBarData(
+            //               spots: spots,
+            //               isCurved: true,
+            //               isStrokeCapRound: true,
+            //               barWidth: 3,
+            //               dotData: FlDotData(show: false),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ]);
+          },
+        ),
+      ),
     );
   }
+}
+
+class Data {
+  Data(this.value, double inital) {
+    this.time = double.parse(
+        (DateTime.now().millisecondsSinceEpoch / 1000 - inital)
+            .toStringAsFixed(2));
+  }
+  final double value;
+  late double time;
 }
