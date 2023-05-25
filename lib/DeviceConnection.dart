@@ -10,7 +10,8 @@ import 'dart:async';
 import 'Device.dart';
 
 class DeviceConnection extends StatefulWidget {
-  const DeviceConnection({super.key, required this.device, required this.setDevice});
+  const DeviceConnection(
+      {super.key, required this.device, required this.setDevice});
 
   final Device? device;
   final Function(Device?) setDevice;
@@ -73,41 +74,58 @@ class _DeviceConnectionState extends State<DeviceConnection> {
       appBar: AppBar(
         title: Text('DeviceConnection'),
       ),
-      body: Column(
-        children: [
-          Text('Bluetooth'),
-          if (!_isBluetoothSupported)
-            Text('Bluetooth is not available on this device')
-          else if (_bluetoothState == BluetoothState.on)
-            Container(
-              height: 400,
-              child: BluetoothDeviceConnection(),
-            )
-          else if (_bluetoothState == BluetoothState.off)
-            Container(
-                child: Row(
+      body: widget.device != null
+          ? Row(
               children: [
-                Text('Bluetooth is off'),
+                Text("You are connected to a "),
+                Text(widget.device!.getType()),
+                Text(" device named "),
+                Text(widget.device!.getName()),
                 ElevatedButton(
-                  onPressed: () {
-                    _flutterBlue!.turnOn();
-                  },
-                  child: Text('Turn on'),
-                ),
+                    onPressed: () {
+                      widget.device!.disconnect();
+                      widget.setDevice(null);
+                    },
+                    child: Text('Disconnect')
+                    )
               ],
-            ))
-          else
-            Text('Bluetooth state unknown, permission might be missing'),
-          Text('Serial'),
-          if (!_isSerialSupported)
-            Text('Serial is not available on this device')
-          else
-          Container(
-            height: 400,
-            child: SerialDeviceConnection(device: widget.device, setDevice: widget.setDevice),
-          )
-        ],
-      ),
+            )
+          : Column(
+              children: [
+                Text('Bluetooth'),
+                if (!_isBluetoothSupported)
+                  Text('Bluetooth is not available on this device')
+                else if (_bluetoothState == BluetoothState.on)
+                  Container(
+                    height: 400,
+                    child: BluetoothDeviceConnection(),
+                  )
+                else if (_bluetoothState == BluetoothState.off)
+                  Container(
+                      child: Row(
+                    children: [
+                      Text('Bluetooth is off'),
+                      ElevatedButton(
+                        onPressed: () {
+                          _flutterBlue!.turnOn();
+                        },
+                        child: Text('Turn on'),
+                      ),
+                    ],
+                  ))
+                else
+                  Text('Bluetooth state unknown, permission might be missing'),
+                Text('Serial'),
+                if (!_isSerialSupported)
+                  Text('Serial is not available on this device')
+                else
+                  Container(
+                    height: 400,
+                    child: SerialDeviceConnection(
+                        device: widget.device, setDevice: widget.setDevice),
+                  )
+              ],
+            ),
     );
   }
 }

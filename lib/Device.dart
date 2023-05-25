@@ -15,12 +15,17 @@ abstract class Device {
 
   // Abstract method to write data to the device
   void writeData(Uint8List data);
+
+  String getType();
+
+  String getName();
 }
 
 class SerialDevice extends Device {
   late SerialPort _serialPort;
   String _portAddress;
   int _baudrate;
+  late SerialPortReader reader;
 
   SerialDevice(this._portAddress, this._baudrate) {
     SerialPort.availablePorts;
@@ -46,6 +51,7 @@ class SerialDevice extends Device {
   @override
   Future<void> disconnect() async {
     try {
+      reader.close();
       await _serialPort.close();
     } catch (e) {
       print("Failed to disconnect from the serial device: $e");
@@ -55,8 +61,11 @@ class SerialDevice extends Device {
   @override
   Stream<String> readData() {
     try {
-      SerialPortReader reader = SerialPortReader(_serialPort);
-      return reader.stream.map((event) => String.fromCharCodes(event).split('\n').length > 1 ? String.fromCharCodes(event).split('\n')[1] : "0");
+      reader = SerialPortReader(_serialPort);
+      return reader.stream.map((event) =>
+          String.fromCharCodes(event).split('\n').length > 1
+              ? String.fromCharCodes(event).split('\n')[1]
+              : "0");
     } catch (e) {
       print("Failed to read data from the serial device: $e");
     }
@@ -72,6 +81,16 @@ class SerialDevice extends Device {
     } catch (e) {
       print("Failed to write data to the serial device: $e");
     }
+  }
+
+  @override
+  String getType() {
+    return "Serial";
+  }
+
+  @override
+  String getName() {
+    return _portAddress;
   }
 }
 

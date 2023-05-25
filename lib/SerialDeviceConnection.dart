@@ -66,30 +66,7 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
                 ],
               );
             }),
-          // if (device != null)
-          //   StreamBuilder<String>(
-          //     stream: reader,
-          //     builder: (context, snapshot) {
-          //       if (snapshot.hasError) {
-          //         return Text('Error: ${snapshot.error}');
-          //       }
-          //       if (snapshot.connectionState == ConnectionState.waiting) {
-          //         return const Text('Awaiting result...');
-          //       }
-          //       return Column(
-          //         mainAxisAlignment: MainAxisAlignment.center,
-          //         children: <Widget>[
-          //           const Text(
-          //             'Counter from Arduino:',
-          //           ),
-          //           Text(
-          //             snapshot.data!,
-          //             style: Theme.of(context).textTheme.headline1,
-          //           ),
-          //         ],
-          //       );
-          //     },
-          //   ),
+          
         ],
       ),
     );
