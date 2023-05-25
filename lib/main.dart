@@ -2,11 +2,10 @@ import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'DeviceIcon.dart';
-import 'Dashboard.dart';
-import 'DashboardItem.dart';
 import 'Device.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:dashboard/dashboard.dart';
 
 void main() {
   runApp(const MyApp());
@@ -56,14 +55,46 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  int? slot;
+
+  setSlot() {
+    var w = MediaQuery.of(context).size.width;
+    setState(() {
+      slot = w > 600
+          ? w > 900
+              ? 8
+              : 6
+          : 4;
+    });
+  }
+
+  late DashboardItemController itemController = DashboardItemController(
+    items: [
+      DashboardItem(width: 2, height: 3, identifier: "id_1"),
+      DashboardItem(
+          startX: 3, startY: 4, width: 3, height: 1, identifier: "id_2"),
+    ],
+  );
+
+  Future<void> init() async {
+    await Future.delayed(const Duration(seconds: 1));
+    itemController.isEditing = true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    var w = MediaQuery.of(context).size.width;
+    slot = w > 600
+        ? w > 900
+            ? 8
+            : 6
+        : 4;
     return Scaffold(
       floatingActionButton: DeviceIcon(device: device, setDevice: setDevice),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
@@ -95,49 +126,103 @@ class _MyHomePageState extends State<MyHomePage> {
               this.spots.removeAt(0);
             }
 
-            return Dashboard(childrens: [
-              DashboardItem(
-                title: "Roll",
-                child: SfCartesianChart(
-                  primaryXAxis: CategoryAxis(
-                    title: AxisTitle(text: 'Time (s)'),
-                    visibleMinimum: 0,
-                    visibleMaximum: 400,
-                  ),
-                  tooltipBehavior: TooltipBehavior(enable: true),
-                  series: <ChartSeries<Data, String>>[
-                    LineSeries<Data, String>(
-                      dataSource: this.visibleData,
-                      xValueMapper: (Data data, _) => data.time.toString(),
-                      yValueMapper: (Data data, _) => data.value,
-                      // Enable data label
-                      // dataLabelSettings:
-                      //     DataLabelSettings(isVisible: true)
-                    )
-                  ],
-                ),
-              ),
-              DashboardItem (
-                title: "Pitch",
-                child: Container (height: 500,
-                  width: 500,
-                  child: LineChart(
-                    LineChartData(
-                      lineTouchData: LineTouchData(enabled: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: spots,
-                          isCurved: true,
-                          isStrokeCapRound: true,
-                          barWidth: 3,
-                          dotData: FlDotData(show: false),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ]);
+            return Dashboard(
+              dashboardItemController: itemController,
+              itemBuilder: (item) {
+                return Text(item.identifier);
+                //return widget
+              },
+              slotCount: slot!,
+              itemStyle: ItemStyle(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15)),
+                  shadowColor: Colors.black,
+                  animationDuration: const Duration(milliseconds: 200),
+                  borderOnForeground: false,
+                  clipBehavior: Clip.antiAliasWithSaveLayer,
+                  elevation: 10,
+                  textStyle: const TextStyle(color: Colors.black),
+                  type: MaterialType.card),
+              slideToTop: true,
+              editModeSettings: EditModeSettings(
+
+                  // animation settings
+                  curve: Curves.easeInOutCirc,
+                  duration: const Duration(milliseconds: 200),
+
+                  // fill editing item actual size
+                  fillEditingBackground: true,
+
+                  // space that can be held to resize
+                  resizeCursorSide: 20,
+
+                  // draw lines for slots
+                  // paintBackgroundLines: true,
+
+                  // shrink items when editing if possible and necessary
+                  shrinkOnMove: true,
+
+                  // long press to edit
+                  longPressEnabled: true,
+
+                  // pan to edit
+                  panEnabled: true,
+                  backgroundStyle: const EditModeBackgroundStyle(
+                      fillColor: Color.fromARGB(10, 10, 10, 10),
+                      lineWidth: 0,
+                      lineColor: Colors.transparent,
+
+                      // line by vertical space
+                      dualLineHorizontal: false,
+
+                      // line by horizontal space
+                      dualLineVertical: false)),
+            );
+            // return Dashboard(childrens: [
+            //   DashboardItem(
+            //     title: "Roll",
+            //     child: SfCartesianChart(
+            //       primaryXAxis: CategoryAxis(
+            //         title: AxisTitle(text: 'Time (s)'),
+            //         visibleMinimum: 0,
+            //         visibleMaximum: 400,
+            //       ),
+            //       tooltipBehavior: TooltipBehavior(enable: true),
+            //       series: <ChartSeries<Data, String>>[
+            //         LineSeries<Data, String>(
+            //           dataSource: this.visibleData,
+            //           xValueMapper: (Data data, _) => data.time.toString(),
+            //           yValueMapper: (Data data, _) => data.value,
+            //           // Enable data label
+            //           // dataLabelSettings:
+            //           //     DataLabelSettings(isVisible: true)
+            //         )
+            //       ],
+            //     ),
+            //   ),
+            //   DashboardItem (
+            //     title: "Pitch",
+            //     child: Container (height: 500,
+            //       width: 500,
+            //       child: LineChart(
+            //         LineChartData(
+            //           lineTouchData: LineTouchData(enabled: false),
+            //           lineBarsData: [
+            //             LineChartBarData(
+            //               spots: spots,
+            //               isCurved: true,
+            //               isStrokeCapRound: true,
+            //               barWidth: 3,
+            //               dotData: FlDotData(show: false),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ]);
           },
         ),
       ),
