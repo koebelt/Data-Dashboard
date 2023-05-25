@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'DeviceIcon.dart';
@@ -44,13 +45,19 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Data> data = [];
   List<Data> visibleData = [];
   List<FlSpot> spots = [];
-  int initialTime = DateTime.now().millisecondsSinceEpoch;
+  double initialTime = DateTime.now().millisecondsSinceEpoch / 1000;
 
   setDevice(Device? device) {
     setState(() {
       this.device = device;
+      if (this.device == null) {
+        Navigator.pop(context);
+        return;
+      }
       this.device!.connect().then((_) {
         this.dataStream = device?.readData();
+        initialTime = DateTime.now().millisecondsSinceEpoch / 1000;
+        Navigator.pop(context);
       });
     });
   }
@@ -70,9 +77,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   late DashboardItemController itemController = DashboardItemController(
     items: [
-      DashboardItem(width: 2, height: 3, identifier: "id_1"),
       DashboardItem(
-          startX: 3, startY: 4, width: 3, height: 1, identifier: "id_2"),
+          startY: 0, startX: 0, width: 3, height: 3, identifier: "id_1"),
+      DashboardItem(
+          startY: 0, startX: 3, width: 3, height: 3, identifier: "id_2"),
     ],
   );
 
@@ -90,16 +98,34 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     var w = MediaQuery.of(context).size.width;
-    slot = w > 600
-        ? w > 900
-            ? 8
-            : 6
-        : 4;
+    slot = w > 300
+        ? w > 600
+            ? w > 900
+                ? w > 1200
+                    ? 10
+                    : 8
+                : 6
+            : 4
+        : 3;
     return Scaffold(
+      // appBar: AppBar(
+      //   actions: [
+      //     IconButton(
+      //       onPressed: () {
+      //         itemController.isEditing = !itemController.isEditing;
+      //       },
+      //       icon: Icon(
+      //         itemController.isEditing
+      //             ? Icons.check_box
+      //             : Icons.check_box_outline_blank,
+      //       ),
+      //     ),
+      //   ],
+      // ),
       floatingActionButton: DeviceIcon(device: device, setDevice: setDevice),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       body: Padding(
-        padding: EdgeInsets.only(top: 100),
+        padding: EdgeInsets.all(0),
         child: StreamBuilder<String>(
           stream: dataStream,
           builder: (context, snapshot) {
@@ -115,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   .visibleData
                   .add(Data(double.parse(snapshot.data!), initialTime));
               this.spots.add(FlSpot(
-                  (DateTime.now().millisecondsSinceEpoch - initialTime)
+                  (DateTime.now().millisecondsSinceEpoch / 1000 - initialTime)
                       .toDouble(),
                   double.parse(snapshot.data!)));
             }
@@ -127,9 +153,71 @@ class _MyHomePageState extends State<MyHomePage> {
             }
 
             return Dashboard(
+              padding: EdgeInsets.all(50),
               dashboardItemController: itemController,
               itemBuilder: (item) {
-                return Text(item.identifier);
+                switch (item.identifier) {
+                  case "id_1":
+                    return SfCartesianChart(
+                      primaryXAxis: CategoryAxis(
+                        title: AxisTitle(text: 'Time (s)'),
+                      ),
+                      tooltipBehavior: TooltipBehavior(enable: true),
+                      series: <ChartSeries<Data, String>>[
+                        LineSeries<Data, String>(
+                          dataSource: this.visibleData,
+                          xValueMapper: (Data data, _) => data.time.toString(),
+                          yValueMapper: (Data data, _) => data.value,
+                        )
+                      ],
+                    );
+                  case "id_2":
+                    return Padding(
+                      padding: EdgeInsets.only(
+                          left: 10, bottom: 20, top: 20, right: 20),
+                      child: LineChart(
+                        LineChartData(
+                          lineTouchData: LineTouchData(enabled: false),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: spots,
+                              isCurved: true,
+                              isStrokeCapRound: true,
+                              barWidth: 3,
+                              dotData: FlDotData(show: false),
+                            ),
+                          ],
+                          titlesData: FlTitlesData(
+                            show: true,
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                              ),
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              axisNameWidget: Text(
+                                'Time (s)',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                              axisNameSize: 20,
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                reservedSize: 30,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+
+                  default:
+                    return Text(item.identifier);
+                }
                 //return widget
               },
               slotCount: slot!,
@@ -145,29 +233,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   elevation: 10,
                   textStyle: const TextStyle(color: Colors.black),
                   type: MaterialType.card),
-              slideToTop: true,
+              slideToTop: false,
               editModeSettings: EditModeSettings(
-
-                  // animation settings
                   curve: Curves.easeInOutCirc,
                   duration: const Duration(milliseconds: 200),
-
-                  // fill editing item actual size
                   fillEditingBackground: true,
-
-                  // space that can be held to resize
                   resizeCursorSide: 20,
-
-                  // draw lines for slots
-                  // paintBackgroundLines: true,
-
-                  // shrink items when editing if possible and necessary
-                  shrinkOnMove: true,
-
-                  // long press to edit
+                  shrinkOnMove: false,
                   longPressEnabled: true,
-
-                  // pan to edit
                   panEnabled: true,
                   backgroundStyle: const EditModeBackgroundStyle(
                       fillColor: Color.fromARGB(10, 10, 10, 10),
@@ -231,9 +304,11 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class Data {
-  Data(this.value, int inital) {
-    this.time = DateTime.now().millisecondsSinceEpoch - inital;
+  Data(this.value, double inital) {
+    this.time = double.parse(
+        (DateTime.now().millisecondsSinceEpoch / 1000 - inital)
+            .toStringAsFixed(2));
   }
   final double value;
-  late num time;
+  late double time;
 }
