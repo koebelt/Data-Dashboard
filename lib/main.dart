@@ -135,6 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Awaiting result...');
             }
+            print(snapshot!.data);
             if (snapshot.data != null) {
               this.data.add(Data(double.parse(snapshot.data!), initialTime));
               this

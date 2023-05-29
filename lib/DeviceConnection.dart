@@ -86,8 +86,7 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                       widget.device!.disconnect();
                       widget.setDevice(null);
                     },
-                    child: Text('Disconnect')
-                    )
+                    child: Text('Disconnect'))
               ],
             )
           : Column(
@@ -98,7 +97,8 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                 else if (_bluetoothState == BluetoothState.on)
                   Container(
                     height: 400,
-                    child: BluetoothDeviceConnection(),
+                    child: BluetoothDeviceConnection(
+                        device: widget.device, setDevice: widget.setDevice),
                   )
                 else if (_bluetoothState == BluetoothState.off)
                   Container(
