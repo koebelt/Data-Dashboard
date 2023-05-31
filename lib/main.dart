@@ -95,6 +95,25 @@ class _MyHomePageState extends State<MyHomePage> {
     init();
   }
 
+  List<dynamic>? parseReceivedData(String receivedString) {
+    int startIndex = receivedString.indexOf('!');
+    int endIndex = receivedString.indexOf('\n', startIndex + 1);
+
+    if (startIndex != -1 && endIndex != -1) {
+      String line = receivedString.substring(startIndex + 1, endIndex - 1);
+      List<String> parts = line.split(':');
+      if (parts.length == 2) {
+        double? index = double.tryParse(parts[0]);
+        double? data = double.tryParse(parts[1]);
+        if (index != null && data != null) {
+          return [index, data];
+        }
+      }
+    }
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     var w = MediaQuery.of(context).size.width;
@@ -135,16 +154,22 @@ class _MyHomePageState extends State<MyHomePage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Awaiting result...');
             }
-            print(snapshot!.data);
+            // print(snapshot!.data);
             if (snapshot.data != null) {
-              this.data.add(Data(double.parse(snapshot.data!), initialTime));
-              this
-                  .visibleData
-                  .add(Data(double.parse(snapshot.data!), initialTime));
-              this.spots.add(FlSpot(
-                  (DateTime.now().millisecondsSinceEpoch / 1000 - initialTime)
-                      .toDouble(),
-                  double.parse(snapshot.data!)));
+              List<dynamic>? data = parseReceivedData(snapshot.data!);
+              if (data != null) {
+                double index = data[0];
+                double value = data[1];
+                if (this.data.isEmpty) {
+                  this.data.add(Data(value, index));
+                  this.visibleData.add(Data(value, index));
+                  this.spots.add(FlSpot(index, value));
+                } else if (this.data.lastOrNull!.index < index) {
+                  this.data.add(Data(value, index));
+                  this.visibleData.add(Data(value, index));
+                  this.spots.add(FlSpot(index, value));
+                }
+              }
             }
             if (this.visibleData.length > 400) {
               this.visibleData.removeAt(0);
@@ -167,7 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       series: <ChartSeries<Data, String>>[
                         LineSeries<Data, String>(
                           dataSource: this.visibleData,
-                          xValueMapper: (Data data, _) => data.time.toString(),
+                          xValueMapper: (Data data, _) => data.index.toString(),
                           yValueMapper: (Data data, _) => data.value,
                         )
                       ],
@@ -305,11 +330,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class Data {
-  Data(this.value, double inital) {
-    this.time = double.parse(
-        (DateTime.now().millisecondsSinceEpoch / 1000 - inital)
-            .toStringAsFixed(2));
-  }
+  Data(this.value, this.index);
   final double value;
-  late double time;
+  final double index;
 }

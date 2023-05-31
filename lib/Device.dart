@@ -66,10 +66,7 @@ class SerialDevice extends Device {
   Stream<String> readData() {
     try {
       reader = SerialPortReader(_serialPort);
-      return reader.stream.map((event) =>
-          String.fromCharCodes(event).split('\n').length > 1
-              ? String.fromCharCodes(event).split('\n')[1]
-              : "0");
+      return reader.stream.map((event) => String.fromCharCodes(event));
     } catch (e) {
       print("Failed to read data from the serial device: $e");
     }
@@ -121,6 +118,8 @@ class BlueToothDevice extends Device {
           if (element.uuid.toString().contains(channel)) {
             _characteristics = element;
             _stream = _characteristics!.value;
+            print(_characteristics);
+            return;
           }
         });
       });
@@ -141,10 +140,8 @@ class BlueToothDevice extends Device {
   @override
   Stream<String> readData() {
     try {
-      return _stream.map((event) =>
-          String.fromCharCodes(event).split('\n').length > 1
-              ? String.fromCharCodes(event).split('\n')[1]
-              : "0");
+      _characteristics!.setNotifyValue(true);
+      return _stream.map((event) => String.fromCharCodes(event));
     } catch (e) {
       print("Failed to read data from the bluetooth device: $e");
     }

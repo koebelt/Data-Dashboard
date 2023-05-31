@@ -113,7 +113,7 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
                           border: OutlineInputBorder(),
                           labelText: 'Channel',
                         ),
-                        keyboardType: TextInputType.number,
+                        keyboardType: TextInputType.text,
                         onChanged: (value) {
                           setState(() {
                             channel = value;
