@@ -39,6 +39,8 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
     return Scrollbar(
       child: ListView(
         children: [
+          if (availablePorts.isEmpty)
+            Center(child: Text('No serial ports found')),
           for (final address in availablePorts)
             Builder(builder: (context) {
               print(address);
@@ -66,7 +68,6 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
                 ],
               );
             }),
-          
         ],
       ),
     );
