@@ -154,8 +154,9 @@ class _MyHomePageState extends State<MyHomePage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text('Awaiting result...');
             }
-            // print(snapshot!.data);
+            print(snapshot!.data);
             if (snapshot.data != null) {
+              print(snapshot.data!);
               List<dynamic>? data = parseReceivedData(snapshot.data!);
               if (data != null) {
                 double index = data[0];

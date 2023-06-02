@@ -123,7 +123,21 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                     height: 400,
                     child: SerialDeviceConnection(
                         device: widget.device, setDevice: widget.setDevice),
-                  )
+                  ),
+                Text('Virtual Device'),
+                ExpansionTile(
+                title: Text("VirtualDevice"),
+                children: [
+                  
+                  ElevatedButton(
+                    child: Text('Connect'),
+                    onPressed: () async {
+                      widget.setDevice(VirtualDevice());
+                    },
+                  ),
+                ],
+              ),
+
               ],
             ),
     );
