@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -163,5 +165,60 @@ class BlueToothDevice extends Device {
   @override
   String getName() {
     return _device.name;
+  }
+}
+
+class VirtualDevice extends Device {
+  late StreamController<String> _dataStreamController;
+  late Timer _sinusoidTimer;
+  double x = 0.0;
+  double index = 0;
+
+  VirtualDevice();
+
+  @override
+  Future<void> connect() async {
+    // Initialize the data stream controller
+    _dataStreamController = StreamController<String>();
+
+    // Start generating and sending sinusoidal waveform after a connection is established
+    _sinusoidTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
+      _dataStreamController.add('!$index:${sin(x) * 20}\n');
+      x += 0.05;
+      index++;
+    });
+  }
+
+  @override
+  Future<void> disconnect() async {
+    // Stop the sinusoid generation timer
+    _sinusoidTimer.cancel();
+
+    // Close the data stream controller
+    await _dataStreamController.close();
+
+    print('VirtualDevice disconnected.');
+  }
+
+  @override
+  Stream<String> readData() {
+    return _dataStreamController.stream;
+  }
+
+  @override
+  void writeData(Uint8List data) {
+    if (_dataStreamController != null && !_dataStreamController.isClosed) {
+      _dataStreamController.add(String.fromCharCodes(data));
+    }
+  }
+
+  @override
+  String getType() {
+    return 'Virtual Device';
+  }
+
+  @override
+  String getName() {
+    return 'Virtual Device';
   }
 }
