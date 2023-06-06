@@ -85,9 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   late DashboardItemController itemController = DashboardItemController(
     items: [
-      DashboardItem(width: 3, height: 3, identifier: "yaw"),
-      DashboardItem(width: 3, height: 3, identifier: "pitch"),
-      DashboardItem(width: 3, height: 3, identifier: "roll"),
+      DashboardItem(width: 6, height: 6, identifier: "ypr"),
       DashboardItem(width: 3, height: 3, identifier: "plane"),
       DashboardItem(width: 3, height: 3, identifier: "accyaw"),
       DashboardItem(width: 3, height: 3, identifier: "accpitch"),
@@ -150,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 visibleDataMap[key] = visibleDataMap[key] ?? [];
                 dataMap[key]!.add(Data(value, index));
                 visibleDataMap[key]!.add(FlSpot(index, value));
-                if (visibleDataMap[key]!.length > 300) {
+                if (visibleDataMap[key]!.length > 100) {
                   visibleDataMap[key]!.removeAt(0);
                 }
               }
@@ -260,7 +258,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       dualLineVertical: false)),
               itemBuilder: (item) {
                 switch (item.identifier) {
-                  case "yaw":
+                  case "ypr":
                     return Padding(
                       padding: EdgeInsets.only(
                           left: 10, bottom: 20, top: 20, right: 20),
@@ -269,94 +267,25 @@ class _MyHomePageState extends State<MyHomePage> {
                           lineTouchData: LineTouchData(enabled: false),
                           lineBarsData: [
                             LineChartBarData(
+                              color: Colors.blue,
                               spots: visibleDataMap["yaw"] ?? [],
-                              isCurved: true,
+                              isCurved: false,
                               isStrokeCapRound: true,
                               barWidth: 3,
                               dotData: FlDotData(show: false),
                             ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Yaw',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  case "pitch":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
                             LineChartBarData(
+                              color: Colors.green,
                               spots: visibleDataMap["pitch"] ?? [],
-                              isCurved: true,
+                              isCurved: false,
                               isStrokeCapRound: true,
                               barWidth: 3,
                               dotData: FlDotData(show: false),
                             ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Pitch',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  case "roll":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
                             LineChartBarData(
+                              color: Colors.red,
                               spots: visibleDataMap["roll"] ?? [],
-                              isCurved: true,
+                              isCurved: false,
                               isStrokeCapRound: true,
                               barWidth: 3,
                               dotData: FlDotData(show: false),
