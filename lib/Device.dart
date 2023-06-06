@@ -183,7 +183,8 @@ class VirtualDevice extends Device {
 
     // Start generating and sending sinusoidal waveform after a connection is established
     _sinusoidTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
-      _dataStreamController.add('!$index:${sin(x) * 20}\n');
+      _dataStreamController.add(
+          '!$index?yaw:${cos(x) * 20};pitch:${sin(x) * 20};roll:${tan(x) * 20};accyaw:${cos(x) * 20};accr:${sin(x) * 20};accp:${tan(x) * 20};vyaw:${cos(x) * 20};vp:${sin(x) * 20};vr:${tan(x) * 20};accx:${cos(x) * 20};accy:${sin(x) * 20};accz:${tan(x) * 20};vx:${cos(x) * 20};vy:${sin(x) * 20};vz:${tan(x) * 20};alt:${cos(x) * 20};long:${sin(x) * 20};lat:${tan(x) * 20};\n');
       x += 0.05;
       index++;
     });
