@@ -19,10 +19,18 @@ class _DeviceIconState extends State<DeviceIcon> {
       padding: EdgeInsets.only(top: 20, right: 15),
       child: FloatingActionButton(
         backgroundColor: Colors.white,
-        child: Container(),
-        onPressed: () => {
-          Navigator.of(context).push(_createRoute())
-        },
+        child: widget.device != null
+            ? Image.asset(
+                'assets/connectedIcon.png',
+                height: 30,
+                width: 30,
+              )
+            : Image.asset(
+                'assets/disconnectedIcon.png',
+                height: 30,
+                width: 30,
+              ),
+        onPressed: () => {Navigator.of(context).push(_createRoute())},
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(40.0),
         ),
@@ -32,13 +40,15 @@ class _DeviceIconState extends State<DeviceIcon> {
 
   Route _createRoute() {
     return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => DeviceConnection(device: widget.device, setDevice: widget.setDevice),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          DeviceConnection(device: widget.device, setDevice: widget.setDevice),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(0.0, 1.0);
         const end = Offset.zero;
         const curve = Curves.ease;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
 
         return SlideTransition(
           position: animation.drive(tween),
@@ -48,5 +58,3 @@ class _DeviceIconState extends State<DeviceIcon> {
     );
   }
 }
-
-

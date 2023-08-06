@@ -75,69 +75,107 @@ class _DeviceConnectionState extends State<DeviceConnection> {
         title: Text('DeviceConnection'),
       ),
       body: widget.device != null
-          ? Row(
-              children: [
-                Text("You are connected to a "),
-                Text(widget.device!.getType()),
-                Text(" device named "),
-                Text(widget.device!.getName()),
-                ElevatedButton(
-                    onPressed: () {
-                      widget.device!.disconnect();
-                      widget.setDevice(null);
-                    },
-                    child: Text('Disconnect'))
-              ],
+          ? Center(
+              child: Wrap(
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                runAlignment: WrapAlignment.center,
+                children: [
+                  Text("You are connected to a ",
+                      style: TextStyle(
+                        fontSize: 20,
+                      )),
+                  Text(widget.device!.getType(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      )),
+                  Text(" device named ",
+                      style: TextStyle(
+                        fontSize: 20,
+                      )),
+                  Text(widget.device!.getName(),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      )),
+                  ElevatedButton(
+                      onPressed: () {
+                        widget.device!.disconnect();
+                        widget.setDevice(null);
+                      },
+                      child: Text('Disconnect'))
+                ],
+              ),
             )
           : Column(
               children: [
-                Text('Bluetooth'),
-                if (!_isBluetoothSupported)
-                  Text('Bluetooth is not available on this device')
-                else if (_bluetoothState == BluetoothState.on)
-                  Container(
-                    height: 400,
-                    child: BluetoothDeviceConnection(
-                        device: widget.device, setDevice: widget.setDevice),
-                  )
-                else if (_bluetoothState == BluetoothState.off)
-                  Container(
-                      child: Row(
+                Expanded(
+                  child: Column(
                     children: [
-                      Text('Bluetooth is off'),
+                      Text('Bluetooth',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      if (!_isBluetoothSupported)
+                        Text('Bluetooth is not available on this device')
+                      else if (_bluetoothState == BluetoothState.on)
+                        Expanded(
+                          child: BluetoothDeviceConnection(
+                              device: widget.device,
+                              setDevice: widget.setDevice),
+                        )
+                      else if (_bluetoothState == BluetoothState.off)
+                        Container(
+                          child: Row(
+                            children: [
+                              Text('Bluetooth is off'),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _flutterBlue!.turnOn();
+                                },
+                                child: Text('Turn on'),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        Text(
+                            'Bluetooth state unknown, permission might be missing'),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text('Serial',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      if (!_isSerialSupported)
+                        Text('Serial is not available on this device')
+                      else
+                        Expanded(
+                          child: SerialDeviceConnection(
+                              device: widget.device,
+                              setDevice: widget.setDevice),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text('Virtual Device',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
                       ElevatedButton(
-                        onPressed: () {
-                          _flutterBlue!.turnOn();
+                        child: Text('Connect'),
+                        onPressed: () async {
+                          widget.setDevice(VirtualDevice());
                         },
-                        child: Text('Turn on'),
                       ),
                     ],
-                  ))
-                else
-                  Text('Bluetooth state unknown, permission might be missing'),
-                Text('Serial'),
-                if (!_isSerialSupported)
-                  Text('Serial is not available on this device')
-                else
-                  Container(
-                    height: 400,
-                    child: SerialDeviceConnection(
-                        device: widget.device, setDevice: widget.setDevice),
                   ),
-                Text('Virtual Device'),
-                ExpansionTile(
-                title: Text("VirtualDevice"),
-                children: [
-                  
-                  ElevatedButton(
-                    child: Text('Connect'),
-                    onPressed: () async {
-                      widget.setDevice(VirtualDevice());
-                    },
-                  ),
-                ],
-              ),
-
+                ),
               ],
             ),
     );

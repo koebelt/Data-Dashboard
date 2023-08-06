@@ -183,8 +183,10 @@ class VirtualDevice extends Device {
 
     // Start generating and sending sinusoidal waveform after a connection is established
     _sinusoidTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
+      // _dataStreamController.add(
+      //     '!$index?yaw:${cos(x) * 20};pitch:${sin(x) * 20};roll:${cos(x + 1) * 20};accyaw:${cos(x) * 20};accr:${sin(x) * 20};accp:${cos(x + 1) * 20};vyaw:${cos(x) * 20};vp:${sin(x) * 20};vr:${cos(x + 1) * 20};accx:${cos(x) * 20};accy:${sin(x) * 20};accz:${cos(x + 1) * 20};vx:${cos(x) * 20};vy:${sin(x) * 20};vz:${cos(x + 1) * 20};alt:${cos(x) * 20};long:${sin(x) * 20};lat:${cos(x + 1) * 20};\n');
       _dataStreamController.add(
-          '!$index?yaw:${cos(x) * 20};pitch:${sin(x) * 20};roll:${cos(x + 1) * 20};accyaw:${cos(x) * 20};accr:${sin(x) * 20};accp:${cos(x + 1) * 20};vyaw:${cos(x) * 20};vp:${sin(x) * 20};vr:${cos(x + 1) * 20};accx:${cos(x) * 20};accy:${sin(x) * 20};accz:${cos(x + 1) * 20};vx:${cos(x) * 20};vy:${sin(x) * 20};vz:${cos(x + 1) * 20};alt:${cos(x) * 20};long:${sin(x) * 20};lat:${cos(x + 1) * 20};\n');
+          '!$index?yaw:${cos(x) * 20};pitch:${sin(x) * 20};roll:${cos(x + 1) * 20};acc:(accroll:${cos(x + 1) * 20},accpitch:${cos(x) * 20},accroll:${sin(x) * 20},);\n');
       x += 0.05;
       index++;
     });

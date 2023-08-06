@@ -4,10 +4,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'DeviceIcon.dart';
 import 'Device.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'Dashboard.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:dashboard/dashboard.dart';
 import 'package:ditredi/ditredi.dart';
+import "Data.dart";
 // import 'package:vector_math/vector_math_64.dart';
 
 void main() {
@@ -45,8 +45,9 @@ class _MyHomePageState extends State<MyHomePage> {
   Device? device;
   Stream<String>? dataStream;
   // List<Data> data = [];
-  Map<String, List<Data>> dataMap = {};
+  Map<String, List<List<Data>>> dataMap = {};
   Map<String, List<FlSpot>> visibleDataMap = {};
+  Map<String, DashboardItem> graphs = {};
   DiTreDiController? controller;
   Mesh3D? plane;
   // List<Data> visibleData = [];
@@ -68,42 +69,9 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  int? slot;
-
-  setSlot() {
-    var w = MediaQuery.of(context).size.width;
-    setState(() {
-      slot = w > 600
-          ? w > 900
-              ? w > 1200
-                  ? w > 1500
-                      ? 12
-                      : 10
-                  : 8
-              : 6
-          : 4;
-    });
-  }
-
-  late DashboardItemController itemController = DashboardItemController(
-    items: [
-      DashboardItem(width: 6, height: 6, identifier: "ypr"),
-      DashboardItem(width: 4, height: 4, identifier: "plane"),
-      DashboardItem(width: 4, height: 4, identifier: "accypr"),
-      DashboardItem(width: 4, height: 4, identifier: "vypr"),
-      DashboardItem(width: 4, height: 4, identifier: "accxyz"),
-      DashboardItem(width: 4, height: 4, identifier: "vxyz"),
-      DashboardItem(width: 4, height: 4, identifier: "alt"),
-      DashboardItem(width: 4, height: 4, identifier: "long"),
-      DashboardItem(width: 4, height: 4, identifier: "lat"),
-    ],
-  );
-
   Future<void> init() async {
     plane =
         Mesh3D(await ObjParser().loadFromResources('assets/paper-plane.obj'));
-    await Future.delayed(const Duration(seconds: 1));
-    itemController.isEditing = true;
   }
 
   @override
@@ -113,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
     init();
   }
 
-  List<dynamic>? parseReceivedData(String receivedString) {
+  void parseReceivedData(String receivedString) {
     int startIndex = receivedString.indexOf('!');
     int endIndex = receivedString.indexOf('\n', startIndex + 1);
 
@@ -124,593 +92,88 @@ class _MyHomePageState extends State<MyHomePage> {
       if (parts.length == 2) {
         double? index = double.tryParse(parts[0]);
         if (index != null) {
-          RegExp valueRegex = RegExp(r'([a-zA-Z]+):(-?[0-9]+).([0-9]+)');
-          Iterable<Match> valueMatches = valueRegex.allMatches(parts[1]);
-          // print(valueMatches);
-          for (Match match in valueMatches) {
+          // print(parts[1]);
+          final regex = RegExp(r'(\w+):(-?[0-9.]+);');
+          final groupRegex = RegExp(r'(\w+):\((\S+)+\)');
+          final insideRegex = RegExp(r'(\w+):(-?[0-9.]+),');
+
+          Iterable<Match> matches = regex.allMatches(parts[1]);
+          Iterable<Match> groupMatches = groupRegex.allMatches(parts[1]);
+
+          for (Match match in groupMatches) {
             String key = match.group(1)!;
-            double? value =
-                double.tryParse(match.group(2)! + '.' + match.group(3)!);
-            if (value != null) {
-              dataMap[key] = dataMap[key] ?? [];
-              if (dataMap[key]!.lastOrNull == null) {
-                visibleDataMap[key] = visibleDataMap[key] ?? [];
-                dataMap[key]!.add(Data(value, index));
-                visibleDataMap[key]!.add(FlSpot(index, value));
-              } else if (dataMap[key]!.lastOrNull?.index != null &&
-                  dataMap[key]!.lastOrNull!.index < index) {
-                visibleDataMap[key] = visibleDataMap[key] ?? [];
-                dataMap[key]!.add(Data(value, index));
-                visibleDataMap[key]!.add(FlSpot(index, value));
-                if (visibleDataMap[key]!.length > 100) {
-                  visibleDataMap[key]!.removeAt(0);
-                }
+            String group = match.group(2)!;
+            Iterable<Match> insideMatches = insideRegex.allMatches(group);
+            List<Data> insideValues = [];
+            dataMap[key] = dataMap[key] ?? [];
+            for (Match insideMatch in insideMatches) {
+              String insideKey = insideMatch.group(1)!;
+              double? insideValue = double.tryParse(insideMatch.group(2)!);
+              if (insideValue != null) {
+                insideValues.add(Data(insideKey, insideValue, index));
               }
             }
-            // print(key);
-            // print(value);
+            int i = 0;
+            for (Data data in insideValues) {
+              dataMap[key]!.length <= i
+                  ? dataMap[key]!.add([data])
+                  : dataMap[key]![i].add(data);
+              i++;
+            }
+          }
+          for (Match match in matches) {
+            String key = match.group(1)!;
+            double? value = double.tryParse(match.group(2)!);
+            if (value != null) {
+              dataMap[key] = dataMap[key] ?? [];
+              dataMap[key]!.length <= 0
+                  ? dataMap[key]!.add([Data(key, value, index)])
+                  : dataMap[key]![0].add(Data(key, value, index));
+            }
           }
         }
       }
-      // if (parts.length == 2) {
-      //   double? index = double.tryParse(parts[0]);
-      //   double? data = double.tryParse(parts[1]);
-      //   if (index != null && data != null) {
-      //     return [index, data];
-      //   }
-      // }
     }
-
-    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    var w = MediaQuery.of(context).size.width;
-    slot = w > 600
-        ? w > 900
-            ? w > 1200
-                ? w > 1500
-                    ? 12
-                    : 10
-                : 8
-            : 6
-        : 4;
-
     return Scaffold(
-      // appBar: AppBar(
-      //   actions: [
-      //     IconButton(
-      //       onPressed: () {
-      //         itemController.isEditing = !itemController.isEditing;
-      //       },
-      //       icon: Icon(
-      //         itemController.isEditing
-      //             ? Icons.check_box
-      //             : Icons.check_box_outline_blank,
-      //       ),
-      //     ),
-      //   ],
-      // ),
       floatingActionButton: DeviceIcon(device: device, setDevice: setDevice),
       floatingActionButtonLocation: FloatingActionButtonLocation.miniEndTop,
       body: Padding(
         padding: EdgeInsets.all(0),
         child: StreamBuilder<String>(
-          stream: dataStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Text('Awaiting result...');
-            }
-            // print(snapshot!.data);
-            if (snapshot.data != null) {
-              itemController.isEditing = true;
-              parseReceivedData(snapshot.data!);
-              controller?.update(
-                rotationX: dataMap["pitch"]!.lastOrNull!.value,
-                rotationY: dataMap["yaw"]!.lastOrNull!.value,
-                rotationZ: dataMap["roll"]!.lastOrNull!.value * -1,
+            stream: dataStream,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Text('Awaiting result...');
+              }
+              // print(snapshot!.data);
+              if (snapshot.data != null) {
+                parseReceivedData(snapshot.data!);
+              }
+
+              return Dashboard(
+                items: dataMap.keys
+                    .map(
+                      (e) => DashboardItem(
+                        title: e,
+                        dataPoints: List.generate(
+                            dataMap[e]!.length,
+                            (index) => dataMap[e]![index].length > 400
+                                ? dataMap[e]![index]
+                                    .sublist(dataMap[e]![index].length - 400)
+                                : dataMap[e]![index]),
+                      ),
+                    )
+                    .toList(),
               );
-            }
-
-            return Dashboard(
-              padding: EdgeInsets.all(50),
-              dashboardItemController: itemController,
-              slotCount: slot!,
-              itemStyle: ItemStyle(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
-                  shadowColor: Colors.black,
-                  animationDuration: const Duration(milliseconds: 200),
-                  borderOnForeground: false,
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  elevation: 10,
-                  textStyle: const TextStyle(color: Colors.black),
-                  type: MaterialType.card),
-              slideToTop: false,
-              shrinkToPlace: false,
-              editModeSettings: EditModeSettings(
-                  curve: Curves.easeInOutCirc,
-                  duration: const Duration(milliseconds: 200),
-                  fillEditingBackground: true,
-                  resizeCursorSide: 20,
-                  shrinkOnMove: true,
-                  longPressEnabled: true,
-                  panEnabled: true,
-                  backgroundStyle: const EditModeBackgroundStyle(
-                      fillColor: Color.fromARGB(10, 10, 10, 10),
-                      lineWidth: 0,
-                      lineColor: Colors.transparent,
-
-                      // line by vertical space
-                      dualLineHorizontal: false,
-
-                      // line by horizontal space
-                      dualLineVertical: false)),
-              itemBuilder: (item) {
-                switch (item.identifier) {
-                  case "ypr":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              color: Colors.blue,
-                              spots: visibleDataMap["yaw"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.green,
-                              spots: visibleDataMap["pitch"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.red,
-                              spots: visibleDataMap["roll"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Roll',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  case "accypr":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              color: Colors.blue,
-                              spots: visibleDataMap["accyaw"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.green,
-                              spots: visibleDataMap["accp"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.red,
-                              spots: visibleDataMap["accr"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Acc Yaw',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-
-                  case "vypr":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              color: Colors.blue,
-                              spots: visibleDataMap["vyaw"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.green,
-                              spots: visibleDataMap["vp"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.red,
-                              spots: visibleDataMap["vr"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'V Yaw',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  case "accxyz":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              color: Colors.blue,
-                              spots: visibleDataMap["accx"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.green,
-                              spots: visibleDataMap["accy"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.red,
-                              spots: visibleDataMap["accz"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Acc X',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-
-                  case "vxyz":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              color: Colors.blue,
-                              spots: visibleDataMap["vx"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.green,
-                              spots: visibleDataMap["vy"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                            LineChartBarData(
-                              color: Colors.red,
-                              spots: visibleDataMap["vz"] ?? [],
-                              isCurved: false,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'V X',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  case "alt":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: visibleDataMap["alt"] ?? [],
-                              isCurved: true,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Altitude',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  case "long":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: visibleDataMap["long"] ?? [],
-                              isCurved: true,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Longitude',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  case "lat":
-                    return Padding(
-                      padding: EdgeInsets.only(
-                          left: 10, bottom: 20, top: 20, right: 20),
-                      child: LineChart(
-                        LineChartData(
-                          lineTouchData: LineTouchData(enabled: false),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: visibleDataMap["lat"] ?? [],
-                              isCurved: true,
-                              isStrokeCapRound: true,
-                              barWidth: 3,
-                              dotData: FlDotData(show: false),
-                            ),
-                          ],
-                          titlesData: FlTitlesData(
-                            show: true,
-                            topTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            rightTitles: AxisTitles(
-                              sideTitles: SideTitles(
-                                showTitles: false,
-                              ),
-                            ),
-                            bottomTitles: AxisTitles(
-                              axisNameWidget: Text(
-                                'Latitude',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                              axisNameSize: 20,
-                              sideTitles: SideTitles(
-                                showTitles: true,
-                                reservedSize: 30,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-
-                  case "plane":
-                    return (DiTreDi(
-                      figures: [
-                        if (plane != null) plane!,
-                      ],
-                      controller: controller,
-                    ));
-
-                  default:
-                    return Text(item.identifier);
-                }
-                //return widget
-              },
-            );
-          },
-        ),
+            }),
       ),
     );
   }
 }
-
-class Data {
-  Data(this.value, this.index);
-  final double value;
-  final double index;
-}
-
-// yo mec faut pas laisser ton pc unlock comme ça c'est super dangereux frérot
