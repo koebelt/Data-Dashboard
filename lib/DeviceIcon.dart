@@ -16,9 +16,19 @@ class _DeviceIconState extends State<DeviceIcon> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(top: 20, right: 15),
-      child: FloatingActionButton(
-        backgroundColor: Colors.white,
+      padding: const EdgeInsets.only(top: 20, right: 15),
+      child: ElevatedButton(
+        style: const ButtonStyle(
+          backgroundColor: MaterialStatePropertyAll(Colors.white),
+          foregroundColor: MaterialStatePropertyAll(Colors.white),
+          padding: MaterialStatePropertyAll(EdgeInsets.zero),
+          fixedSize: MaterialStatePropertyAll(Size(60, 60)),
+          shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(50)),
+            ),
+          ),
+        ),
         child: widget.device != null
             ? Image.asset(
                 'assets/connectedIcon.png',
@@ -30,10 +40,9 @@ class _DeviceIconState extends State<DeviceIcon> {
                 height: 30,
                 width: 30,
               ),
-        onPressed: () => {Navigator.of(context).push(_createRoute())},
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(40.0),
-        ),
+        onPressed: () {
+          Navigator.of(context).push(_createRoute());
+        },
       ),
     );
   }

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -24,8 +23,7 @@ class _DeviceConnectionState extends State<DeviceConnection> {
   FlutterBluePlus? _flutterBlue;
   bool _isBluetoothSupported = false;
   bool _isSerialSupported = false;
-  StreamSubscription<BluetoothState>? _stateSubscription;
-  BluetoothState _bluetoothState = BluetoothState.unknown;
+  final BluetoothState _bluetoothState = BluetoothState.unknown;
 
   @override
   void initState() {
@@ -47,11 +45,6 @@ class _DeviceConnectionState extends State<DeviceConnection> {
       });
 
       if (isAvailable) {
-        _stateSubscription = _flutterBlue!.state.listen((state) {
-          setState(() {
-            _bluetoothState = state;
-          });
-        });
       }
     }
   }
@@ -72,7 +65,7 @@ class _DeviceConnectionState extends State<DeviceConnection> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('DeviceConnection'),
+        title: const Text('DeviceConnection'),
       ),
       body: widget.device != null
           ? Center(
@@ -81,21 +74,21 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                 crossAxisAlignment: WrapCrossAlignment.center,
                 runAlignment: WrapAlignment.center,
                 children: [
-                  Text("You are connected to a ",
+                  const Text("You are connected to a ",
                       style: TextStyle(
                         fontSize: 20,
                       )),
                   Text(widget.device!.getType(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       )),
-                  Text(" device named ",
+                  const Text(" device named ",
                       style: TextStyle(
                         fontSize: 20,
                       )),
                   Text(widget.device!.getName(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
                       )),
@@ -104,7 +97,7 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                         widget.device!.disconnect();
                         widget.setDevice(null);
                       },
-                      child: Text('Disconnect'))
+                      child: const Text('Disconnect'))
                 ],
               ),
             )
@@ -113,11 +106,11 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Bluetooth',
+                      const Text('Bluetooth',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
                       if (!_isBluetoothSupported)
-                        Text('Bluetooth is not available on this device')
+                        const Text('Bluetooth is not available on this device')
                       else if (_bluetoothState == BluetoothState.on)
                         Expanded(
                           child: BluetoothDeviceConnection(
@@ -125,21 +118,19 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                               setDevice: widget.setDevice),
                         )
                       else if (_bluetoothState == BluetoothState.off)
-                        Container(
-                          child: Row(
-                            children: [
-                              Text('Bluetooth is off'),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _flutterBlue!.turnOn();
-                                },
-                                child: Text('Turn on'),
-                              ),
-                            ],
-                          ),
+                        Row(
+                          children: [
+                            const Text('Bluetooth is off'),
+                            ElevatedButton(
+                              onPressed: () {
+                                _flutterBlue!.turnOn();
+                              },
+                              child: const Text('Turn on'),
+                            ),
+                          ],
                         )
                       else
-                        Text(
+                        const Text(
                             'Bluetooth state unknown, permission might be missing'),
                     ],
                   ),
@@ -147,11 +138,11 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Serial',
+                      const Text('Serial',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
                       if (!_isSerialSupported)
-                        Text('Serial is not available on this device')
+                        const Text('Serial is not available on this device')
                       else
                         Expanded(
                           child: SerialDeviceConnection(
@@ -164,11 +155,11 @@ class _DeviceConnectionState extends State<DeviceConnection> {
                 Expanded(
                   child: Column(
                     children: [
-                      Text('Virtual Device',
+                      const Text('Virtual Device',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
                       ElevatedButton(
-                        child: Text('Connect'),
+                        child: const Text('Connect'),
                         onPressed: () async {
                           widget.setDevice(VirtualDevice());
                         },

@@ -5,10 +5,10 @@ import 'dart:async';
 import 'Device.dart';
 
 class BluetoothDeviceConnection extends StatefulWidget {
-  BluetoothDeviceConnection(
+  const BluetoothDeviceConnection(
       {super.key, required this.device, required this.setDevice});
 
-  Device? device;
+  final Device? device;
   final Function(Device?) setDevice;
 
   @override
@@ -17,8 +17,8 @@ class BluetoothDeviceConnection extends StatefulWidget {
 }
 
 class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
-  FlutterBluePlus _flutterBlue = FlutterBluePlus.instance;
-  List<BluetoothDevice> _devicesList = [];
+  final FlutterBluePlus _flutterBlue = FlutterBluePlus.instance;
+  final List<BluetoothDevice> _devicesList = [];
   StreamSubscription<ScanResult>? _scanSubscription;
   BluetoothDevice? _connectingDevice;
   bool _isScanning = false;
@@ -57,7 +57,7 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
           });
         }
       }, onDone: _stopScanning);
-      Timer(Duration(seconds: 8), _stopScanning);
+      Timer(const Duration(seconds: 8), _stopScanning);
     }
   }
 
@@ -94,7 +94,7 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
           if (_isScanning)
             _buildLoadingIndicator(), // Show loading indicator if scanning is ongoing
           if (!_isScanning && _devicesList.isEmpty)
-            Expanded(
+            const Expanded(
               child: Center(
                 child: Text('No devices found'),
               ),
@@ -109,7 +109,7 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
                     subtitle: Text(device.id.toString()),
                     children: [
                       TextField(
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           border: OutlineInputBorder(),
                           labelText: 'Channel',
                         ),
@@ -134,15 +134,15 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
 
   Widget _buildLoadingIndicator() {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       alignment: Alignment.center,
-      child: CircularProgressIndicator(),
+      child: const CircularProgressIndicator(),
     );
   }
 
   Widget _buildConnectButton(BluetoothDevice device) {
     if (_connectingDevice != null && _connectingDevice == device) {
-      return SizedBox(
+      return const SizedBox(
         width: 24.0,
         height: 24.0,
         child: CircularProgressIndicator(),
@@ -152,7 +152,7 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
         onPressed: () {
           _connectToDevice(device); // Connect to the selected device
         },
-        child: Text('Connect'),
+        child: const Text('Connect'),
       );
     }
   }

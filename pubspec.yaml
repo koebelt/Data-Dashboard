@@ -42,6 +42,8 @@ dependencies:
   syncfusion_flutter_charts: ^21.2.6
   fl_chart: ^0.62.0
   ditredi: ^1.0.4
+  flutter_staggered_grid_view: ^0.7.0
+  flutter_joystick: ^0.0.3
 
 dev_dependencies:
   flutter_test:

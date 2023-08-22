@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import 'Device.dart';
@@ -30,7 +28,6 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
   }
 
   void initPorts() {
-    print("initPorts");
     setState(() => availablePorts = SerialPort.availablePorts);
   }
 
@@ -40,16 +37,15 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
       child: ListView(
         children: [
           if (availablePorts.isEmpty)
-            Center(child: Text('No serial connections found')),
+            const Center(child: Text('No serial connections found')),
           for (final address in availablePorts)
             Builder(builder: (context) {
-              print(address);
               int baudRate = 9600;
               return ExpansionTile(
                 title: Text(address),
                 children: [
                   TextField(
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       border: OutlineInputBorder(),
                       labelText: 'Baudrate',
                     ),
@@ -59,9 +55,8 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
                     },
                   ),
                   ElevatedButton(
-                    child: Text('Connect'),
+                    child: const Text('Connect'),
                     onPressed: () async {
-                      print(address);
                       widget.setDevice(SerialDevice(address, baudRate));
                     },
                   ),

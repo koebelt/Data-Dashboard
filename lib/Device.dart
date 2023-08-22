@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:isolate';
 import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
@@ -26,8 +24,8 @@ abstract class Device {
 
 class SerialDevice extends Device {
   late SerialPort _serialPort;
-  String _portAddress;
-  int _baudrate;
+  final String _portAddress;
+  final int _baudrate;
   late SerialPortReader reader;
 
   SerialDevice(this._portAddress, this._baudrate) {
@@ -72,7 +70,7 @@ class SerialDevice extends Device {
     } catch (e) {
       print("Failed to read data from the serial device: $e");
     }
-    return Stream.empty();
+    return const Stream.empty();
   }
 
   @override
@@ -98,16 +96,13 @@ class SerialDevice extends Device {
 }
 
 class BlueToothDevice extends Device {
-  late FlutterBluePlus _flutterBlue;
-  late BluetoothDevice _device;
+  late final BluetoothDevice _device;
   BluetoothCharacteristic? _characteristics;
   String channel;
 
   late Stream<List<int>> _stream;
 
-  BlueToothDevice(this._device, this.channel) {
-    _flutterBlue = FlutterBluePlus.instance;
-  }
+  BlueToothDevice(this._device, this.channel);
 
   @override
   Future<void> connect() async {
@@ -115,16 +110,16 @@ class BlueToothDevice extends Device {
       print("Connecting to the bluetooth device...");
       await _device.connect();
       List<BluetoothService> services = await _device.discoverServices();
-      services.forEach((service) {
-        service.characteristics.forEach((element) {
+      for (var service in services) {
+        for (var element in service.characteristics) {
           if (element.uuid.toString().contains(channel)) {
             _characteristics = element;
             _stream = _characteristics!.value;
             print(_characteristics);
-            return;
+            continue;
           }
-        });
-      });
+        }
+      }
     } catch (e) {
       print("Failed to connect to the bluetooth device: $e");
     }
@@ -147,7 +142,7 @@ class BlueToothDevice extends Device {
     } catch (e) {
       print("Failed to read data from the bluetooth device: $e");
     }
-    return Stream.empty();
+    return const Stream.empty();
   }
 
   @override
@@ -182,7 +177,7 @@ class VirtualDevice extends Device {
     _dataStreamController = StreamController<String>();
 
     // Start generating and sending sinusoidal waveform after a connection is established
-    _sinusoidTimer = Timer.periodic(Duration(milliseconds: 50), (_) {
+    _sinusoidTimer = Timer.periodic(const Duration(milliseconds: 50), (_) {
       // _dataStreamController.add(
       //     '!$index?yaw:${cos(x) * 20};pitch:${sin(x) * 20};roll:${cos(x + 1) * 20};accyaw:${cos(x) * 20};accr:${sin(x) * 20};accp:${cos(x + 1) * 20};vyaw:${cos(x) * 20};vp:${sin(x) * 20};vr:${cos(x + 1) * 20};accx:${cos(x) * 20};accy:${sin(x) * 20};accz:${cos(x + 1) * 20};vx:${cos(x) * 20};vy:${sin(x) * 20};vz:${cos(x + 1) * 20};alt:${cos(x) * 20};long:${sin(x) * 20};lat:${cos(x + 1) * 20};\n');
       _dataStreamController.add(
@@ -210,7 +205,7 @@ class VirtualDevice extends Device {
 
   @override
   void writeData(Uint8List data) {
-    if (_dataStreamController != null && !_dataStreamController.isClosed) {
+    if (!_dataStreamController.isClosed) {
       _dataStreamController.add(String.fromCharCodes(data));
     }
   }
