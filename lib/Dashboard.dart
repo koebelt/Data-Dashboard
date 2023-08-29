@@ -12,29 +12,16 @@ class Dashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(30),
-        child: StaggeredGrid.count(
-          crossAxisCount: _getCrossAxisCount(context),
-          crossAxisSpacing: 16.0,
-          mainAxisSpacing: 16.0,
-          axisDirection: AxisDirection.down,
-          children: items,
-        ));
+      padding: const EdgeInsets.all(30),
+      child: StaggeredGrid.count(
+        crossAxisCount: _getCrossAxisCount(context),
+        crossAxisSpacing: 16.0,
+        mainAxisSpacing: 16.0,
+        axisDirection: AxisDirection.down,
+        children: items,
+      ),
+    );
   }
-
-  //   GridView.builder(
-  //     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  //       crossAxisCount: _getCrossAxisCount(context),
-  //       crossAxisSpacing: 16.0,
-  //       mainAxisSpacing: 16.0,
-  //     ),
-  //     padding: EdgeInsets.all(16),
-  //     itemCount: items.length,
-  //     itemBuilder: (context, index) {
-  //       return items[index];
-  //     },
-  //   );
-  // }
 
   int _getCrossAxisCount(BuildContext context) {
     // You can customize the number of columns based on screen width
@@ -116,10 +103,10 @@ class _DashboardItemState extends State<DashboardItem> {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
+          color: Color.fromARGB(255, 36, 34, 37),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.shade300,
+              color: Color.fromARGB(255, 22, 21, 22),
               blurRadius: 4,
               offset: const Offset(2, 2),
             ),
@@ -134,7 +121,10 @@ class _DashboardItemState extends State<DashboardItem> {
               children: [
                 Text(
                   widget.title.toUpperCase(),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white),
                 ),
                 Align(
                   alignment: Alignment.topRight,
@@ -186,7 +176,6 @@ class _DashboardItemState extends State<DashboardItem> {
                 ),
               ],
             ),
-
             const SizedBox(height: 8),
             Expanded(
               child: selected == 'Graph'
@@ -246,15 +235,31 @@ class _DashboardItemState extends State<DashboardItem> {
                             return ListTile(
                               title: Row(
                                 children: widget.dataPoints
-                                    .map((e) =>
-                                        Expanded(child: Text(e[index].name)))
+                                    .map((e) => Expanded(
+                                            child: SelectableText(
+                                          e[index].name,
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.white,
+                                          ),
+                                        )))
                                     .toList(),
                               ),
                               subtitle: Row(
                                 children: widget.dataPoints
-                                    .map((e) => Expanded(
-                                        child: Text(
-                                            e[index].value.toStringAsFixed(5))))
+                                    .map(
+                                      (e) => Expanded(
+                                        child: SelectableText(
+                                          e[index].value.toStringAsFixed(5),
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    )
                                     .toList(),
                               ),
                             );
@@ -276,6 +281,7 @@ class _DashboardItemState extends State<DashboardItem> {
                                             style: const TextStyle(
                                               fontSize: 20,
                                               fontWeight: FontWeight.bold,
+                                              color: Colors.white,
                                             )),
                                         Text(
                                           widget.dataPoints[i].lastOrNull!.value
@@ -283,6 +289,7 @@ class _DashboardItemState extends State<DashboardItem> {
                                           style: const TextStyle(
                                             fontSize: 25,
                                             fontWeight: FontWeight.bold,
+                                            color: Colors.white,
                                           ),
                                         ),
                                       ],
@@ -290,30 +297,27 @@ class _DashboardItemState extends State<DashboardItem> {
                                   ),
                               ],
                             )
-                          : Container(
-                              child: Builder(
-                                builder: (context) {
-                                  if (plane == null) {
-                                    return const Center(
-                                        child: CircularProgressIndicator());
-                                  }
-                                  controller?.update(
-                                    userScale: 1.5,
-                                    rotationX:
-                                        widget.dataPoints[1].lastOrNull!.value +
-                                            90,
-                                    rotationY:
-                                        widget.dataPoints[2].lastOrNull!.value +
-                                            180,
-                                    rotationZ:
-                                        widget.dataPoints[0].lastOrNull!.value,
-                                  );
+                          : Builder(
+                              builder: (context) {
+                                if (plane == null) {
+                                  return const Center(
+                                      child: CircularProgressIndicator());
+                                }
+                                controller?.update(
+                                  userScale: 1.5,
+                                  rotationX:
+                                      widget.dataPoints[1].lastOrNull!.value +
+                                          90,
+                                  rotationY:
+                                      widget.dataPoints[2].lastOrNull!.value +
+                                          180,
+                                  rotationZ:
+                                      widget.dataPoints[0].lastOrNull!.value,
+                                );
 
-                                  return DiTreDi(
-                                      figures: [plane!],
-                                      controller: controller!);
-                                },
-                              ),
+                                return DiTreDi(
+                                    figures: [plane!], controller: controller!);
+                              },
                             ),
             ),
           ],

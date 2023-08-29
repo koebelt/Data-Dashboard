@@ -4,3 +4,9 @@ class Data {
   final double value;
   final double index;
 }
+
+class Setting {
+  Setting(this.hasJoysticks, this.hasCommand);
+  bool hasJoysticks;
+  bool hasCommand;
+}

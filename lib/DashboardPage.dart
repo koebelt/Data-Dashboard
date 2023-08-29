@@ -1,3 +1,4 @@
+import 'package:data_dashboard/SettingIcon.dart';
 import 'package:flutter/material.dart';
 import 'DeviceIcon.dart';
 import 'Device.dart';
@@ -16,6 +17,7 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  Setting setting = Setting(true, true);
   Device? device;
   Stream<String>? dataStream;
   Map<String, List<List<Data>>> dataMap = {};
@@ -40,6 +42,12 @@ class _DashboardPageState extends State<DashboardPage> {
         dataStream = device?.readData();
         Navigator.pop(context);
       });
+    });
+  }
+
+  setSetting(Setting newSetting) {
+    setState(() {
+      setting = newSetting;
     });
   }
 
@@ -139,15 +147,23 @@ class _DashboardPageState extends State<DashboardPage> {
               }
 
               return SingleChildScrollView(
-                child: Dashboard(
-                  items: dataMap.keys
-                      .map(
-                        (e) => DashboardItem(
-                          title: e,
-                          dataPoints: dataMap[e]!,
-                        ),
-                      )
-                      .toList(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Dashboard(
+                      items: dataMap.keys
+                          .map(
+                            (e) => DashboardItem(
+                              title: e,
+                              dataPoints: dataMap[e]!,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    SizedBox(
+                      height: 250,
+                    )
+                  ],
                 ),
               );
             },
@@ -159,10 +175,11 @@ class _DashboardPageState extends State<DashboardPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DeviceIcon(device: device, setDevice: setDevice),
+              SettingIcon(setting: setting, setSetting: setSetting)
             ],
           ),
         ),
-        const ControlPanel(),
+        ControlPanel(setting: setting),
       ],
     );
   }
