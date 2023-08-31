@@ -72,8 +72,8 @@ class _ControlPanelState extends State<ControlPanel>
                 alignment: Alignment.bottomCenter,
                 child: IgnorePointer(
                   child: CustomPaint(
-                    painter: CurvedPathPainter(animationValue),
-                    // painter: ControlPanelCustomPainter(hasFocus: commandHasFocus),
+                    painter: CurvedPathPainter(
+                        animationValue, MediaQuery.of(context).orientation),
                     child: Container(height: 250),
                   ),
                 ),
@@ -83,8 +83,10 @@ class _ControlPanelState extends State<ControlPanel>
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
             child: Container(
-              width: MediaQuery.of(context).size.width > 900
-                  ? MediaQuery.of(context).size.width * 0.8 - 300
+              width: MediaQuery.of(context).size.width > 900 ||
+                      MediaQuery.of(context).orientation ==
+                          Orientation.landscape
+                  ? MediaQuery.of(context).size.width * 0.5
                   : MediaQuery.of(context).size.width * 0.8,
               decoration: BoxDecoration(
                 color: Color.fromARGB(255, 36, 34, 37),
@@ -156,7 +158,8 @@ class _ControlPanelState extends State<ControlPanel>
           ),
         ),
         widget.setting.hasJoysticks
-            ? MediaQuery.of(context).size.width > 900
+            ? MediaQuery.of(context).size.width > 900 ||
+                    MediaQuery.of(context).orientation == Orientation.landscape
                 ? Align(
                     alignment: Alignment.bottomLeft,
                     child: Padding(
@@ -187,7 +190,8 @@ class _ControlPanelState extends State<ControlPanel>
                 : Container()
             : Container(),
         widget.setting.hasJoysticks
-            ? MediaQuery.of(context).size.width > 900
+            ? MediaQuery.of(context).size.width > 900 ||
+                    MediaQuery.of(context).orientation == Orientation.landscape
                 ? Align(
                     alignment: Alignment.bottomRight,
                     child: Padding(
@@ -224,8 +228,9 @@ class _ControlPanelState extends State<ControlPanel>
 
 class CurvedPathPainter extends CustomPainter {
   final double animationValue;
+  final Orientation orientation;
 
-  CurvedPathPainter(this.animationValue);
+  CurvedPathPainter(this.animationValue, this.orientation);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -234,32 +239,38 @@ class CurvedPathPainter extends CustomPainter {
 
     final path;
 
-    if (size.width > 900) {
+    if (size.width > 900 || orientation == Orientation.landscape) {
       path = Path()
         ..moveTo(0, 0)
-        ..lineTo(100 * curve1avancement + 75 * curve2avancement, 0)
+        ..lineTo(
+            size.width * 0.05 * curve1avancement + 75 * curve2avancement, 0)
         ..cubicTo(
-            (100 + 100) * curve1avancement + (75 + 200) * curve2avancement,
+            size.width * 0.15 * curve1avancement +
+                (75 + 200) * curve2avancement,
             0,
-            (100 + 100) * curve1avancement + (75 + 200) * curve2avancement,
+            size.width * 0.15 * curve1avancement +
+                (75 + 200) * curve2avancement,
             -120 * curve1avancement + 150 * curve2avancement,
-            (100 + 200) * curve1avancement + (75 + 350) * curve2avancement,
+            size.width * 0.25 * curve1avancement +
+                (75 + 350) * curve2avancement,
             -120 * curve1avancement + 150 * curve2avancement)
         ..lineTo(
             size.width -
-                (100 + 200) * curve1avancement -
+                size.width * 0.25 * curve1avancement -
                 (75 + 350) * curve2avancement,
             -120 * curve1avancement + 150 * curve2avancement)
         ..cubicTo(
             size.width -
-                (100 + 100) * curve1avancement -
+                size.width * 0.15 * curve1avancement -
                 (75 + 200) * curve2avancement,
             -120 * curve1avancement + 150 * curve2avancement,
             size.width -
-                (100 + 100) * curve1avancement -
+                size.width * 0.15 * curve1avancement -
                 (75 + 200) * curve2avancement,
             0,
-            size.width - 100 * curve1avancement - 75 * curve2avancement,
+            size.width -
+                size.width * 0.05 * curve1avancement -
+                75 * curve2avancement,
             0)
         ..lineTo(size.width, 0)
         ..lineTo(size.width, size.height)
@@ -269,18 +280,18 @@ class CurvedPathPainter extends CustomPainter {
       path = Path()
         ..moveTo(0, size.height * curve2avancement)
         ..cubicTo(
-            25,
+            size.width * 0.01,
             0 + size.height * curve2avancement,
-            25,
+            size.width * 0.01,
             -120 * curve1avancement + 150 * curve2avancement,
-            100,
+            size.width * 0.15,
             -120 * curve1avancement + 150 * curve2avancement)
-        ..lineTo(
-            size.width - 100, -120 * curve1avancement + 150 * curve2avancement)
+        ..lineTo(size.width - size.width * 0.15,
+            -120 * curve1avancement + 150 * curve2avancement)
         ..cubicTo(
-            size.width - 25,
+            size.width - size.width * 0.01,
             -120 * curve1avancement + 150 * curve2avancement,
-            size.width - 25,
+            size.width - size.width * 0.01,
             0 + size.height * curve2avancement,
             size.width,
             0 + size.height * curve2avancement)
