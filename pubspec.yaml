@@ -36,12 +36,13 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   flutter_blue_plus: ^1.4.0
-  libserialport: ^0.3.0+1
+  # libserialport: ^0.3.0+1
   flutter_libserialport:
     path: local_dependencies/flutter_libserialport-main
   syncfusion_flutter_charts: ^21.2.6
   fl_chart: ^0.62.0
-  dashboard: ^0.0.3+1
+  # dashboard: ^0.0.3+1
+  flutter_staggered_grid_view: ^0.7.0
   ditredi: ^1.0.4
 
 dev_dependencies:

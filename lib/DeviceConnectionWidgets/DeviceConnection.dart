@@ -7,7 +7,7 @@ import 'SerialDeviceConnection.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 import 'dart:async';
-import 'Device.dart';
+import '../Device/Device.dart';
 
 class DeviceConnection extends StatefulWidget {
   const DeviceConnection(

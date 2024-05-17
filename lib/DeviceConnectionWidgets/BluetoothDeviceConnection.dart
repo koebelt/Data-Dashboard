@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart' as bluetooth;
 
 import 'dart:async';
-import 'Device.dart';
+import '../Device/Device.dart';
+import 'package:data_dashboard/Device/BluetoothDevice.dart';
 
 class BluetoothDeviceConnection extends StatefulWidget {
   BluetoothDeviceConnection(
@@ -17,10 +18,10 @@ class BluetoothDeviceConnection extends StatefulWidget {
 }
 
 class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
-  FlutterBluePlus _flutterBlue = FlutterBluePlus.instance;
-  List<BluetoothDevice> _devicesList = [];
-  StreamSubscription<ScanResult>? _scanSubscription;
-  BluetoothDevice? _connectingDevice;
+  bluetooth.FlutterBluePlus _flutterBlue = bluetooth.FlutterBluePlus.instance;
+  List<bluetooth.BluetoothDevice> _devicesList = [];
+  StreamSubscription<bluetooth.ScanResult>? _scanSubscription;
+  bluetooth.BluetoothDevice? _connectingDevice;
   bool _isScanning = false;
   String channel = '';
 
@@ -73,12 +74,12 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
     _flutterBlue.stopScan();
   }
 
-  Future<void> _connectToDevice(BluetoothDevice device) async {
+  Future<void> _connectToDevice(bluetooth.BluetoothDevice device) async {
     setState(() {
       _connectingDevice = device;
     });
 
-    widget.setDevice(BlueToothDevice(device, channel));
+    widget.setDevice(BluetoothDevice(device, channel));
   }
 
   Future<void> _refreshDevices() async {
@@ -99,34 +100,33 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
                 child: Text('No devices found'),
               ),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _devicesList.length,
-                itemBuilder: (context, index) {
-                  BluetoothDevice device = _devicesList[index];
-                  return ExpansionTile(
-                    title: Text(device.name),
-                    subtitle: Text(device.id.toString()),
-                    children: [
-                      TextField(
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          labelText: 'Channel',
-                        ),
-                        keyboardType: TextInputType.text,
-                        onChanged: (value) {
-                          setState(() {
-                            channel = value;
-                          });
-                        },
+          Expanded(
+            child: ListView.builder(
+              itemCount: _devicesList.length,
+              itemBuilder: (context, index) {
+                bluetooth.BluetoothDevice device = _devicesList[index];
+                return ExpansionTile(
+                  title: Text(device.name),
+                  subtitle: Text(device.id.toString()),
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Channel',
                       ),
-                      _buildConnectButton(device),
-
-                    ],
-                  );
-                },
-              ),
+                      keyboardType: TextInputType.text,
+                      onChanged: (value) {
+                        setState(() {
+                          channel = value;
+                        });
+                      },
+                    ),
+                    _buildConnectButton(device),
+                  ],
+                );
+              },
             ),
+          ),
         ],
       ),
     );
@@ -140,7 +140,7 @@ class _BluetoothDeviceConnectionState extends State<BluetoothDeviceConnection> {
     );
   }
 
-  Widget _buildConnectButton(BluetoothDevice device) {
+  Widget _buildConnectButton(bluetooth.BluetoothDevice device) {
     if (_connectingDevice != null && _connectingDevice == device) {
       return SizedBox(
         width: 24.0,

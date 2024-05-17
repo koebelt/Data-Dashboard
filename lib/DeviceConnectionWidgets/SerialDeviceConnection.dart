@@ -2,7 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
-import 'Device.dart';
+import '../Device/Device.dart';
+import 'package:data_dashboard/Device/SerialDevice.dart';
 
 class SerialDeviceConnection extends StatefulWidget {
   const SerialDeviceConnection(
