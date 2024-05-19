@@ -1,0 +1,42 @@
+PODS:
+  - flutter_blue_plus (0.0.1):
+    - flutter_blue_plus/Protos (= 0.0.1)
+    - FlutterMacOS
+  - flutter_blue_plus/Protos (0.0.1):
+    - FlutterMacOS
+    - Protobuf (~> 3.21)
+  - flutter_libserialport (0.0.1):
+    - FlutterMacOS
+    - libserialport
+  - FlutterMacOS (1.0.0)
+  - libserialport (0.1.1)
+  - Protobuf (3.26.1)
+
+DEPENDENCIES:
+  - flutter_blue_plus (from `Flutter/ephemeral/.symlinks/plugins/flutter_blue_plus/macos`)
+  - flutter_libserialport (from `Flutter/ephemeral/.symlinks/plugins/flutter_libserialport/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+
+SPEC REPOS:
+  trunk:
+    - libserialport
+    - Protobuf
+
+EXTERNAL SOURCES:
+  flutter_blue_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_blue_plus/macos
+  flutter_libserialport:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_libserialport/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+
+SPEC CHECKSUMS:
+  flutter_blue_plus: a1b197f623dac8a81acccea1f87dda27ad007534
+  flutter_libserialport: d1a505fd4b05785f7b50cc7c93b361937ea1c5bd
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  libserialport: 1cb25e66ef3c92a8e59c2ea3820302c3fa2268cd
+  Protobuf: a53f5173a603075b3522a5c50be63a67a5f3353a
+
+PODFILE CHECKSUM: 8d5eb26717d76d033124a328d4bd181d8602e993
+
+COCOAPODS: 1.14.3
