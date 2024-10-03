@@ -1,148 +1,110 @@
+import 'package:cbor/cbor.dart';
+import 'dart:typed_data';
+
 class DataList {
-  Map<String, List<Data>> dataList;
+  List<Map<int, Data>> dataList;
 
   DataList({
     required this.dataList,
   });
 
-  factory DataList.fromMap(Map<String, dynamic> data) {
-    Map<String, List<Data>> dataList = {};
-    data.forEach((key, value) {
-      List<Data> dataListValue = [];
-      if (value.runtimeType == double) {
-        dataListValue.add(DataDouble(value: value));
-      } else if (value.runtimeType == String) {
-        dataListValue.add(DataString(value: value));
-      } else if (value.runtimeType == bool) {
-        dataListValue.add(DataBool(value: value));
-      } else if (value.runtimeType == int) {
-        dataListValue.add(DataInt(value: value));
-      } else if (value.runtimeType.toString() == "_Map<String, double>") {
-        if ((value.containsKey('latitude') && value.containsKey('longitude'))) {
-          dataListValue.add(DataLocation(
-              value: Location(
-                  latitude: value['latitude'], longitude: value['longitude'])));
-        } else if (value.containsKey('x') &&
-            value.containsKey('y') &&
-            value.containsKey('z')) {
-          dataListValue.add(DataPosition(
-              value: Position(x: value['x'], y: value['y'], z: value['z'])));
-        }
-      }
-      dataList[key] = dataListValue;
-    });
-    return DataList(dataList: dataList);
+  factory DataList.fromBytes(List<int> bytes) {
+    var decoded = cbor.decode(Uint8List.fromList(bytes));
+    return DataList.fromJson(decoded.toJson() as Map<String, dynamic>);
   }
 
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> data = {};
-    dataList.forEach((key, value) {
-      List<dynamic> dataListValue = [];
-      value.forEach((element) {
-        if (element is DataDouble) {
-          dataListValue.add(element.value);
-        } else if (element is DataString) {
-          dataListValue.add(element.value);
-        } else if (element is DataBool) {
-          dataListValue.add(element.value);
-        } else if (element is DataInt) {
-          dataListValue.add(element.value);
-        } else if (element is DataLocation) {
-          dataListValue.add({
-            'latitude': element.value.latitude,
-            'longitude': element.value.longitude
-          });
-        } else if (element is DataPosition) {
-          dataListValue.add({
-            'x': element.value.x,
-            'y': element.value.y,
-            'z': element.value.z
-          });
+  factory DataList.fromJson(Map<String, dynamic> json) {
+    List<Map<int, Data>> dataList = [];
+    for (Map<String, dynamic> value in json["data"]) {
+      // example data
+      // {Location: {latitude: 37.7749, longitude: 122.4194, altitude: 0.0}}
+      // {Position: {x: 0.0, y: 0.0, z: 0.0}}
+      // {Rotation: {yaw: 0.0, pitch: 0.0, roll: 0.0}}
+      // {Temperature: {temperature: 0.0}}
+      // {Humidity: {humidity: 0.0}}
+      // {Pressure: {pressure: 0.0}}
+      value.forEach((key, value) {
+        switch (key) {
+          case "Location":
+            dataList.add({
+              json["timestamp"]: DataLocation(
+                  value: Location(
+                      latitude: value["latitude"],
+                      longitude: value["longitude"],
+                      altitude: value["altitude"]))
+            });
+            break;
+          case "Position":
+            dataList.add({
+              json["timestamp"]: DataPosition(
+                  value: Position(x: value["x"], y: value["y"], z: value["z"]))
+            });
+            break;
+          case "Rotation":
+            dataList.add({
+              json["timestamp"]: DataRotation(
+                  value: Rotation(
+                      yaw: value["yaw"],
+                      pitch: value["pitch"],
+                      roll: value["roll"]))
+            });
+            break;
+          case "Temperature":
+            dataList.add({
+              json["timestamp"]: DataTemperature(value: value["temperature"])});
+            break;
+          case "Humidity":
+            dataList.add({json["timestamp"]: DataHumidity(value: value["humidity"])});
+            break;
+          case "Pressure":
+            dataList.add({json["timestamp"]: DataPressure(value: value["pressure"])});
+            break;
+          case "Acceleration":
+            dataList.add({
+              json["timestamp"]: DataAcceleration(
+                  value: Position(x: value["x"], y: value["y"], z: value["z"]))
+            });
+            break;
+          case "AngularVelocity":
+            dataList.add({
+              json["timestamp"]: DataAngularVelocity(
+                  value: Rotation(
+                      yaw: value["yaw"],
+                      pitch: value["pitch"],
+                      roll: value["roll"]))
+            });
+            break;
+          default:
+            throw Exception("Invalid data type");
         }
       });
-      data[key] = dataListValue;
-    });
-
-    return data;
-  }
-
-  void addData(String key, Data data) {
-    if (dataList.containsKey(key)) {
-      dataList[key]!.add(data);
-    } else {
-      dataList[key] = [data];
     }
-  }
-
-  void addDataMap(Map<String, dynamic> data) {
-    data.forEach((key, value) {
-      if (value.runtimeType == double) {
-        addData(key, DataDouble(value: value));
-      } else if (value.runtimeType == String) {
-        addData(key, DataString(value: value));
-      } else if (value.runtimeType == bool) {
-        addData(key, DataBool(value: value));
-      } else if (value.runtimeType == int) {
-        addData(key, DataInt(value: value));
-      } else if (value.runtimeType == Map<String, dynamic>) {
-        if ((value.containsKey('latitude') && value.containsKey('longitude'))) {
-          addData(
-              key,
-              DataLocation(
-                  value: Location(
-                      latitude: value['latitude'],
-                      longitude: value['longitude'])));
-        } else if (value.containsKey('x') &&
-            value.containsKey('y') &&
-            value.containsKey('z')) {
-          addData(
-              key,
-              DataPosition(
-                  value:
-                      Position(x: value['x'], y: value['y'], z: value['z'])));
-        }
-      }
-    });
+    return DataList(dataList: dataList);
   }
 }
 
 abstract class Data<T> {
   T value;
-
   Data({required this.value});
-}
-
-// Specific Data subclasses for different types
-class DataDouble extends Data<double> {
-  DataDouble({required double value}) : super(value: value);
 }
 
 class DataString extends Data<String> {
   DataString({required String value}) : super(value: value);
 }
 
-class DataBool extends Data<bool> {
-  DataBool({required bool value}) : super(value: value);
-}
-
-class DataInt extends Data<int> {
-  DataInt({required int value}) : super(value: value);
-}
-
-// Class representing a geographic location
 class Location {
   double latitude;
   double longitude;
+  double altitude;
 
-  Location({required this.latitude, required this.longitude});
+  Location(
+      {required this.latitude, required this.longitude, this.altitude = 0.0});
 }
 
-// Data subclass for Location
 class DataLocation extends Data<Location> {
   DataLocation({required Location value}) : super(value: value);
 }
 
-// Class representing a 3D position
 class Position {
   double x;
   double y;
@@ -151,7 +113,38 @@ class Position {
   Position({required this.x, required this.y, required this.z});
 }
 
-// Data subclass for Position
 class DataPosition extends Data<Position> {
   DataPosition({required Position value}) : super(value: value);
+}
+
+class Rotation {
+  double yaw;
+  double pitch;
+  double roll;
+
+  Rotation({required this.yaw, required this.pitch, required this.roll});
+}
+
+class DataRotation extends Data<Rotation> {
+  DataRotation({required Rotation value}) : super(value: value);
+}
+
+class DataTemperature extends Data<double> {
+  DataTemperature({required double value}) : super(value: value);
+}
+
+class DataPressure extends Data<double> {
+  DataPressure({required double value}) : super(value: value);
+}
+
+class DataHumidity extends Data<double> {
+  DataHumidity({required double value}) : super(value: value);
+}
+
+class DataAcceleration extends Data<Position> {
+  DataAcceleration({required Position value}) : super(value: value);
+}
+
+class DataAngularVelocity extends Data<Rotation> {
+  DataAngularVelocity({required Rotation value}) : super(value: value);
 }

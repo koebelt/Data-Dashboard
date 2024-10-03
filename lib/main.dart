@@ -1,7 +1,11 @@
+import 'dart:ui';
+
 import 'package:data_dashboard/HomePage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 void main() {
+  FlutterBluePlus.setLogLevel(LogLevel.verbose, color: true);
   runApp(const DataDashboard());
 }
 
@@ -18,7 +22,7 @@ class DataDashboard extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(
           seedColor: Color(0xFFd4ff39),
           brightness: Brightness.dark,
-          background: Color(0xFF232323),
+          surface: Color(0xFF232323),
           primaryContainer: Color(0xFFd4ff39),
           primary: Color(0xFFd4ff39),
           secondary: Color(0xFFededdd),
@@ -31,6 +35,7 @@ class DataDashboard extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const HomePage(),
+      
     );
   }
 }

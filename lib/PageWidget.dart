@@ -1,3 +1,5 @@
+import 'package:data_dashboard/Device/Device.dart';
+import 'package:data_dashboard/Device/DeviceConnectionWidgets/DeviceCardWidget.dart';
 import 'package:flutter/material.dart';
 
 class PageWidget extends StatelessWidget {
