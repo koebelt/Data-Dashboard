@@ -1,26 +1,20 @@
 import 'package:data_dashboard/Dashboard/DashboardTileWidget.dart';
+import 'package:data_dashboard/Dashboard/MapViewerWidget.dart';
 import 'package:data_dashboard/Dashboard/TreeDViewerWidget.dart';
 import 'package:data_dashboard/Data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-enum LayoutType {
-  PositionData3DViewer,
-  LocationDataMap,
-  GraphData,
-  RawData,
-}
-
 extension LayoutProvider on StaggeredGrid {
-  static StaggeredGrid fromData(
-      {required BuildContext context,
-      required DataList dataList,
-      required List<LayoutType> layoutTypes}) {
+  static StaggeredGrid fromData({
+    required BuildContext context,
+    required DataList dataList,
+  }) {
     return StaggeredGrid.count(
       mainAxisSpacing: 10,
       crossAxisSpacing: 10,
       crossAxisCount: _getCrossAxisCount(context),
-      children: _layoutBuilder(context, dataList, layoutTypes),
+      children: _layoutBuilder(context, dataList),
     );
   }
 }
@@ -61,47 +55,160 @@ int _getSmallItemWidth(BuildContext context) {
   }
 }
 
-List<Widget> _layoutBuilder(
-    BuildContext context, DataList dataList, List<LayoutType> layoutTypes) {
+List<Widget> _layoutBuilder(BuildContext context, DataList dataList) {
   List<Widget> widgets = [];
-  dataList.dataList.forEach((key, value) {
-    if (layoutTypes.contains(LayoutType.PositionData3DViewer) &&
-        value.first.runtimeType == DataPosition) {
-      widgets.add(_positionData3DViewer(context, key, value));
+
+  for (Map<int, Data> data in dataList.dataList) {
+    // take highest key in the map
+    int timestamp =
+        data.keys.reduce((value, element) => value > element ? value : element);
+    Data value = data[timestamp]!;
+
+    if (value is DataLocation) {
+      widgets.add(_locationDataMap(context, value));
+    } else if (value is DataPosition) {
+      Widget? widget =
+          _positionData3DViewer(context, dataList.dataList, position: value);
+      if (widget != null) {
+        widgets.add(widget);
+      }
+    } else if (value is DataRotation) {
+      Widget? widget =
+          _positionData3DViewer(context, dataList.dataList, rotation: value);
+      if (widget != null) {
+        widgets.add(widget);
+      }
+    } else if (value is DataTemperature) {
+      widgets.add(_graphData(context, data));
+    } else if (value is DataHumidity) {
+      widgets.add(_graphData(context, data));
+    } else if (value is DataPressure) {
+      widgets.add(_graphData(context, data));
+    } else if (value is DataAcceleration) {
+      widgets.add(_graphData(context, data));
+    } else if (value is DataAngularVelocity) {
+      widgets.add(_graphData(context, data));
+    } else if (value is DataString) {
+      widgets.add(_rawData(context, value));
     }
-    if (layoutTypes.contains(LayoutType.LocationDataMap) &&
-        value.first.runtimeType == DataLocation) {
-      widgets.add(_locationDataMap(context, key, value));
-    }
-    if (layoutTypes.contains(LayoutType.GraphData)) {
-      widgets.add(_graphData(context, key, value));
-    }
-    if (layoutTypes.contains(LayoutType.RawData)) {
-      widgets.add(_rawData(context, key, value));
-    }
-  });
+  }
   return widgets;
 }
 
-Widget _positionData3DViewer(
-    BuildContext context, String key, List<Data> value) {
-  return DashboardTileWidget(
-      child: TreeDViewerWidget(), height: 2, width: _getBigItemWidth(context));
+Widget? _positionData3DViewer(
+    BuildContext context, List<Map<int, Data<dynamic>>> dataList,
+    {DataPosition? position, DataRotation? rotation}) {
+  if (position != null) {
+    int index_position = -1;
+    int index_rotation = -1;
+
+    for (Map<int, Data> data in dataList) {
+      int timestamp = data.keys
+          .reduce((value, element) => value > element ? value : element);
+      Data value = data[timestamp]!;
+      if (value is DataRotation) {
+        index_rotation = dataList.indexOf(data);
+        if (index_position != -1) {
+          return DashboardTileWidget(
+            child: TreeDViewerWidget(
+                // dataList: dataList,
+                // position: position,
+                // rotation: value,
+                ),
+            height: 2,
+            width: _getBigItemWidth(context),
+          );
+        } else {
+          return null;
+        }
+      }
+      if (value is DataPosition) {
+        index_position = dataList.indexOf(data);
+      }
+    }
+    return DashboardTileWidget(
+      child: TreeDViewerWidget(
+          // position: position,
+          ),
+      height: 2,
+      width: _getBigItemWidth(context),
+    );
+  } else if (rotation != null) {
+    int index_position = -1;
+    int index_rotation = -1;
+
+    for (Map<int, Data> data in dataList) {
+      int timestamp = data.keys
+          .reduce((value, element) => value > element ? value : element);
+      Data value = data[timestamp]!;
+      if (value is DataPosition) {
+        index_position = dataList.indexOf(data);
+        if (index_rotation != -1) {
+          return DashboardTileWidget(
+            child: TreeDViewerWidget(
+                // dataList: dataList,
+                // position: value,
+                // rotation: rotation,
+                ),
+            height: 2,
+            width: _getBigItemWidth(context),
+          );
+        } else {
+          return null;
+        }
+      }
+      if (value is DataRotation) {
+        index_rotation = dataList.indexOf(data);
+      }
+    }
+    return DashboardTileWidget(
+      child: TreeDViewerWidget(
+          // rotation: rotation,
+          ),
+      height: 2,
+      width: _getBigItemWidth(context),
+    );
+  } else {
+    return null;
+  }
 }
 
-Widget _locationDataMap(BuildContext context, String key, List<Data> value) {
+Widget _locationDataMap(BuildContext context, DataLocation value) {
   return DashboardTileWidget(
-      child: Container(), height: 2, width: _getBigItemWidth(context));
+      child: MapViewerWidget(
+        location: value,
+      ),
+      height: 2,
+      width: _getBigItemWidth(context));
 }
 
-Widget _graphData(BuildContext context, String key, List<Data> value) {
+Widget _graphData(BuildContext context, Map<int, Data> value) {
   return DashboardTileWidget(
+    color: Theme.of(context).colorScheme.tertiary,
     child: Container(),
     width: _getSmallItemWidth(context),
   );
 }
 
-Widget _rawData(BuildContext context, String key, List<Data> value) {
+Widget _rawData(BuildContext context, Data value) {
+  if (value.runtimeType == DataString) {
+    return DashboardTileWidget(
+      color: Theme.of(context).colorScheme.secondary,
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.fitWidth,
+          child: Text(
+            value.value as String,
+            style: TextStyle(
+              fontSize: 42,
+              color: Theme.of(context).colorScheme.background,
+            ),
+          ),
+        ),
+      ),
+      width: _getSmallItemWidth(context),
+    );
+  }
   return DashboardTileWidget(
     child: Container(),
     width: _getSmallItemWidth(context),
