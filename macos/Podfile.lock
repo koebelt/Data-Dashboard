@@ -1,26 +1,27 @@
 PODS:
   - flutter_blue_plus (0.0.1):
-    - flutter_blue_plus/Protos (= 0.0.1)
     - FlutterMacOS
-  - flutter_blue_plus/Protos (0.0.1):
-    - FlutterMacOS
-    - Protobuf (~> 3.21)
   - flutter_libserialport (0.0.1):
     - FlutterMacOS
     - libserialport
   - FlutterMacOS (1.0.0)
+  - geolocator_apple (1.2.0):
+    - FlutterMacOS
   - libserialport (0.1.1)
-  - Protobuf (3.26.1)
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
 
 DEPENDENCIES:
   - flutter_blue_plus (from `Flutter/ephemeral/.symlinks/plugins/flutter_blue_plus/macos`)
   - flutter_libserialport (from `Flutter/ephemeral/.symlinks/plugins/flutter_libserialport/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - geolocator_apple (from `Flutter/ephemeral/.symlinks/plugins/geolocator_apple/macos`)
+  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
     - libserialport
-    - Protobuf
 
 EXTERNAL SOURCES:
   flutter_blue_plus:
@@ -29,14 +30,19 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_libserialport/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  geolocator_apple:
+    :path: Flutter/ephemeral/.symlinks/plugins/geolocator_apple/macos
+  path_provider_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin
 
 SPEC CHECKSUMS:
-  flutter_blue_plus: a1b197f623dac8a81acccea1f87dda27ad007534
+  flutter_blue_plus: e2868679021f19d12a8c0c58a33f1df66ec7fa6a
   flutter_libserialport: d1a505fd4b05785f7b50cc7c93b361937ea1c5bd
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  geolocator_apple: 72a78ae3f3e4ec0db62117bd93e34523f5011d58
   libserialport: 1cb25e66ef3c92a8e59c2ea3820302c3fa2268cd
-  Protobuf: a53f5173a603075b3522a5c50be63a67a5f3353a
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
 
 PODFILE CHECKSUM: 8d5eb26717d76d033124a328d4bd181d8602e993
 
-COCOAPODS: 1.14.3
+COCOAPODS: 1.15.2
