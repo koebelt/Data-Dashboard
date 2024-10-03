@@ -4,8 +4,8 @@ import 'package:flutter_libserialport/flutter_libserialport.dart';
 
 class SerialDevice extends Device {
   late SerialPort _serialPort;
-  String _portAddress;
-  int _baudrate;
+  final String _portAddress;
+  final int _baudrate;
   late SerialPortReader reader;
 
   SerialDevice(this._portAddress, this._baudrate) {
@@ -36,7 +36,7 @@ class SerialDevice extends Device {
   Future<void> disconnect() async {
     try {
       reader.close();
-      await _serialPort.close();
+      _serialPort.close();
     } catch (e) {
       print("Failed to disconnect from the serial device: $e");
     }
