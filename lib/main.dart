@@ -23,6 +23,7 @@ class DataDashboard extends StatelessWidget {
           seedColor: Color(0xFFd4ff39),
           brightness: Brightness.dark,
           surface: Color(0xFF232323),
+          surfaceBright: Color(0xFF2f2f2f),
           primaryContainer: Color(0xFFd4ff39),
           primary: Color(0xFFd4ff39),
           secondary: Color(0xFFededdd),

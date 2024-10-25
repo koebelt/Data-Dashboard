@@ -1,7 +1,4 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_libserialport/flutter_libserialport.dart';
 import '../Device.dart';
 import 'package:data_dashboard/Device/SerialDevice.dart';
@@ -51,8 +48,7 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
             ),
           TextButton(
             onPressed: () {
-              if (widget.device != null &&
-                  widget.device!.getName() == port) {
+              if (widget.device != null && widget.device!.getName() == port) {
                 showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -70,6 +66,7 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
                           TextButton(
                             onPressed: () async {
                               await widget.setDevice(null);
+                              Navigator.of(context).pop();
                               Navigator.of(context).pop();
                             },
                             child: const Text("Disconnect"),
@@ -114,6 +111,8 @@ class _SerialDeviceConnectionState extends State<SerialDeviceConnection> {
                               var serialDevice = SerialDevice(
                                   port, int.parse(baudRateController.text));
                               await widget.setDevice(serialDevice);
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
                             },
                             child: const Text("Connect"),
                           ),

@@ -43,10 +43,10 @@ class SerialDevice extends Device {
   }
 
   @override
-  Stream<String> readData() {
+  Stream<List<int>> readData() {
     try {
       reader = SerialPortReader(_serialPort);
-      return reader.stream.map((event) => String.fromCharCodes(event));
+      return reader.stream;
     } catch (e) {
       print("Failed to read data from the serial device: $e");
     }

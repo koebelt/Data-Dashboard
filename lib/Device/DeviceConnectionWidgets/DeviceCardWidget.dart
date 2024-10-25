@@ -2,7 +2,6 @@ import 'package:data_dashboard/Device/BluetoothDevice.dart';
 import 'package:data_dashboard/Device/Device.dart';
 import 'package:data_dashboard/Device/DeviceConnectionWidgets/DevicePage.dart';
 import 'package:data_dashboard/Device/SerialDevice.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -39,13 +38,15 @@ class _DeviceCardWidgetState extends State<DeviceCardWidget> {
               color: Theme.of(context).colorScheme.primary, width: 2),
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
-                padding: const EdgeInsets.all(10),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                 child: (() {
                   if (widget.device == null) {
                     return SvgPicture.asset(
-                      "assets/usb.svg",
+                      "assets/disconnected.svg",
                       colorFilter: ColorFilter.mode(
                           Theme.of(context).colorScheme.primary,
                           BlendMode.srcIn),

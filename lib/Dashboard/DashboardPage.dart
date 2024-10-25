@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:data_dashboard/Data.dart';
 import 'package:data_dashboard/PageWidget.dart';
 import 'package:flutter/material.dart';
@@ -6,13 +8,48 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:data_dashboard/Dashboard/LayoutProvider.dart';
 
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  const DashboardPage({super.key, this.dataStream});
+
+  final Stream<List<int>>? dataStream;
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
 }
 
 class _DashboardPageState extends State<DashboardPage> {
+  DataList dataList = DataList(dataList: []);
+  StreamSubscription? dataSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    dataSubscription = widget.dataStream?.listen((event) {
+      setState(() {
+        dataList.addDataFromBytes(event);
+      });
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant DashboardPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.dataStream != widget.dataStream) {
+      dataSubscription?.cancel();
+      dataSubscription = widget.dataStream?.listen((event) {
+        setState(() {
+          dataList.addDataFromBytes(event);
+        });
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    dataSubscription?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -23,222 +60,7 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           LayoutProvider.fromData(
             context: context,
-            dataList: DataList.fromBytes([
-              162,
-              100,
-              100,
-              97,
-              116,
-              97,
-              134,
-              161,
-              104,
-              76,
-              111,
-              99,
-              97,
-              116,
-              105,
-              111,
-              110,
-              163,
-              104,
-              108,
-              97,
-              116,
-              105,
-              116,
-              117,
-              100,
-              101,
-              251,
-              64,
-              66,
-              227,
-              47,
-              236,
-              86,
-              213,
-              208,
-              105,
-              108,
-              111,
-              110,
-              103,
-              105,
-              116,
-              117,
-              100,
-              101,
-              251,
-              64,
-              94,
-              154,
-              215,
-              115,
-              24,
-              252,
-              80,
-              104,
-              97,
-              108,
-              116,
-              105,
-              116,
-              117,
-              100,
-              101,
-              249,
-              0,
-              0,
-              161,
-              104,
-              80,
-              111,
-              115,
-              105,
-              116,
-              105,
-              111,
-              110,
-              163,
-              97,
-              120,
-              249,
-              0,
-              0,
-              97,
-              121,
-              249,
-              0,
-              0,
-              97,
-              122,
-              249,
-              0,
-              0,
-              161,
-              104,
-              82,
-              111,
-              116,
-              97,
-              116,
-              105,
-              111,
-              110,
-              163,
-              99,
-              121,
-              97,
-              119,
-              249,
-              0,
-              0,
-              101,
-              112,
-              105,
-              116,
-              99,
-              104,
-              249,
-              0,
-              0,
-              100,
-              114,
-              111,
-              108,
-              108,
-              249,
-              0,
-              0,
-              161,
-              107,
-              84,
-              101,
-              109,
-              112,
-              101,
-              114,
-              97,
-              116,
-              117,
-              114,
-              101,
-              161,
-              107,
-              116,
-              101,
-              109,
-              112,
-              101,
-              114,
-              97,
-              116,
-              117,
-              114,
-              101,
-              249,
-              0,
-              0,
-              161,
-              104,
-              72,
-              117,
-              109,
-              105,
-              100,
-              105,
-              116,
-              121,
-              161,
-              104,
-              104,
-              117,
-              109,
-              105,
-              100,
-              105,
-              116,
-              121,
-              249,
-              0,
-              0,
-              161,
-              104,
-              80,
-              114,
-              101,
-              115,
-              115,
-              117,
-              114,
-              101,
-              161,
-              104,
-              112,
-              114,
-              101,
-              115,
-              115,
-              117,
-              114,
-              101,
-              249,
-              0,
-              0,
-              105,
-              116,
-              105,
-              109,
-              101,
-              115,
-              116,
-              97,
-              109,
-              112,
-              0
-            ]),
+            dataList: dataList,
           ),
         ],
       ),

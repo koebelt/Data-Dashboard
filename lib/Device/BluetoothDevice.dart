@@ -5,8 +5,6 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart' as bluetooth;
 class BluetoothDevice extends Device {
   final bluetooth.BluetoothDevice _device;
   bluetooth.BluetoothCharacteristic? _characteristic;
-  
-
 
   BluetoothDevice(this._device);
 
@@ -19,8 +17,6 @@ class BluetoothDevice extends Device {
     try {
       print("Connecting to the bluetooth device...");
       await _device.connect();
-
-
     } catch (e) {
       print("Failed to connect to the bluetooth device: $e");
     }
@@ -36,14 +32,12 @@ class BluetoothDevice extends Device {
   }
 
   @override
-  Stream<String> readData() {
+  Stream<List<int>> readData() {
     try {
       if (_characteristic == null) {
         return const Stream.empty();
       }
-      return _characteristic!.lastValueStream.map((value) {
-        return String.fromCharCodes(value);
-      });
+      return _characteristic!.lastValueStream;
     } catch (e) {
       print("Failed to read data from the bluetooth device: $e");
     }

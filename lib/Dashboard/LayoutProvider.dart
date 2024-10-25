@@ -1,9 +1,12 @@
 import 'package:data_dashboard/Dashboard/DashboardTileWidget.dart';
 import 'package:data_dashboard/Dashboard/MapViewerWidget.dart';
+import 'package:data_dashboard/Dashboard/NumberViewerWidget.dart';
+import 'package:data_dashboard/Dashboard/NumericalViewerWidget.dart';
 import 'package:data_dashboard/Dashboard/TreeDViewerWidget.dart';
 import 'package:data_dashboard/Data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 extension LayoutProvider on StaggeredGrid {
   static StaggeredGrid fromData({
@@ -79,15 +82,15 @@ List<Widget> _layoutBuilder(BuildContext context, DataList dataList) {
         widgets.add(widget);
       }
     } else if (value is DataTemperature) {
-      widgets.add(_graphData(context, data));
+      widgets.add(_numericalData(context, data));
     } else if (value is DataHumidity) {
-      widgets.add(_graphData(context, data));
+      widgets.add(_numericalData(context, data));
     } else if (value is DataPressure) {
-      widgets.add(_graphData(context, data));
+      widgets.add(_numericalData(context, data));
     } else if (value is DataAcceleration) {
-      widgets.add(_graphData(context, data));
+      widgets.add(_numericalData(context, data));
     } else if (value is DataAngularVelocity) {
-      widgets.add(_graphData(context, data));
+      widgets.add(_numericalData(context, data));
     } else if (value is DataString) {
       widgets.add(_rawData(context, value));
     }
@@ -113,8 +116,11 @@ Widget? _positionData3DViewer(
             child: TreeDViewerWidget(
                 // dataList: dataList,
                 // position: position,
-                // rotation: value,
-                ),
+                rotation: Vector3(
+              value.value.yaw,
+              value.value.pitch,
+              value.value.roll,
+            )),
             height: 2,
             width: _getBigItemWidth(context),
           );
@@ -182,10 +188,12 @@ Widget _locationDataMap(BuildContext context, DataLocation value) {
       width: _getBigItemWidth(context));
 }
 
-Widget _graphData(BuildContext context, Map<int, Data> value) {
+Widget _numericalData(BuildContext context, Map<int, Data> value) {
   return DashboardTileWidget(
-    color: Theme.of(context).colorScheme.tertiary,
-    child: Container(),
+    color: Theme.of(context).colorScheme.secondary,
+    child: NumericalViewerWidget(
+      data: value.entries.last.value,
+    ),
     width: _getSmallItemWidth(context),
   );
 }

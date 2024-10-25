@@ -1,11 +1,10 @@
 import 'dart:io';
-
 import 'package:data_dashboard/Device/Device.dart';
 import 'package:data_dashboard/Device/DeviceConnectionWidgets/BluetoothDeviceConnection.dart';
 import 'package:data_dashboard/Device/DeviceConnectionWidgets/SerialDeviceConnection.dart';
+import 'package:data_dashboard/Device/DeviceConnectionWidgets/VirtualDeviceConnection.dart';
 import 'package:data_dashboard/PageWidget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class DevicePage extends StatefulWidget {
@@ -59,10 +58,9 @@ class _DevicePageState extends State<DevicePage> {
                     },
                   ),
                   const SizedBox(width: 10),
-                  Text(
+                  const Text(
                     "Connect a Device",
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
@@ -91,10 +89,12 @@ class _DevicePageState extends State<DevicePage> {
                 setDevice: widget.setDevice,
               ),
             ),
-            const DeviceSection(
+            DeviceSection(
               title: "Virtual Device",
-              icon: Icon(Icons.developer_mode),
+              icon: const Icon(Icons.developer_mode),
               isSupported: true,
+              child: VirtualDeviceConnection(
+                  device: widget.device, setDevice: widget.setDevice),
             ),
           ],
         ),

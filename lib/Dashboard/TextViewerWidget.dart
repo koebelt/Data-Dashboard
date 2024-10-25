@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class TextViewerWidget extends StatefulWidget {
-  const TextViewerWidget({super.key});
+  const TextViewerWidget({super.key, required this.text});
+
+  final String text;
 
   @override
   State<TextViewerWidget> createState() => _TextViewerWidgetState();

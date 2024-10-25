@@ -30,23 +30,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  _pushToDashboard() async {
-    await Future.delayed(const Duration(seconds: 2));
-
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => const DashboardPage()));
-  }
-
-  _pushToDevice() async {
-    await Future.delayed(const Duration(seconds: 2));
-
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => DevicePage(
-              setDevice: setDevice,
-              device: device,
-            )));
-  }
-
   @override
   void initState() {
     super.initState();
@@ -63,7 +46,10 @@ class _HomePageState extends State<HomePage> {
                 vertical: 20),
             child: DeviceCardWidget(device: device, setDevice: setDevice),
           ),
-          if (device != null) DashboardPage() else LandingPage(),
+          if (device != null)
+            DashboardPage(dataStream: device?.readData())
+          else
+            LandingPage(),
         ],
       ),
     );

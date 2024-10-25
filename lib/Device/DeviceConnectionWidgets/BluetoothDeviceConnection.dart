@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -159,7 +157,6 @@ class _BluetoothDeviceListState extends State<BluetoothDeviceList> {
                           },
                         );
                       } else {
-                        
                         showDialog(
                           context: context,
                           builder: (BuildContext context) {

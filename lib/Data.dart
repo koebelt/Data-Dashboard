@@ -1,12 +1,119 @@
 import 'package:cbor/cbor.dart';
 import 'dart:typed_data';
 
+import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+
 class DataList {
   List<Map<int, Data>> dataList;
 
   DataList({
     required this.dataList,
   });
+
+  void addDataFromBytes(List<int> bytes) {
+    var decoded = cbor.decode(Uint8List.fromList(bytes));
+    addDataFromJson(decoded.toJson() as Map<String, dynamic>);
+  }
+
+  void addDataFromJson(Map<String, dynamic> json) {
+    if (dataList.isEmpty) {
+      dataList = [
+        {0: DataLocation(value: Location(latitude: 0.0, longitude: 0.0))},
+        {0: DataPosition(value: Position(x: 0.0, y: 0.0, z: 0.0))},
+        {0: DataRotation(value: Rotation(yaw: 0.0, pitch: 0.0, roll: 0.0))},
+        {0: DataTemperature(value: 0.0)},
+        {0: DataHumidity(value: 0.0)},
+        {0: DataPressure(value: 0.0)},
+        {0: DataAcceleration(value: Position(x: 0.0, y: 0.0, z: 0.0))},
+        {
+          0: DataAngularVelocity(
+              value: Rotation(yaw: 0.0, pitch: 0.0, roll: 0.0))
+        },
+      ];
+    }
+
+    for (Map<String, dynamic> value in json["data"]) {
+      value.forEach((key, value) {
+        switch (key) {
+          case "Location":
+            dataList
+                .firstWhere((element) => element.values.first is DataLocation)
+                .addAll({
+              json["timestamp"]: DataLocation(
+                  value: Location(
+                      latitude: value["latitude"],
+                      longitude: value["longitude"],
+                      altitude: value["altitude"]))
+            });
+            break;
+          case "Position":
+            dataList
+                .firstWhere((element) => element.values.first is DataPosition)
+                .addAll({
+              json["timestamp"]: DataPosition(
+                  value: Position(x: value["x"], y: value["y"], z: value["z"]))
+            });
+            break;
+          case "Rotation":
+            dataList
+                .firstWhere((element) => element.values.first is DataRotation)
+                .addAll({
+              json["timestamp"]: DataRotation(
+                  value: Rotation(
+                      yaw: value["yaw"],
+                      pitch: value["pitch"],
+                      roll: value["roll"]))
+            });
+            break;
+          case "Temperature":
+            dataList
+                .firstWhere(
+                    (element) => element.values.first is DataTemperature)
+                .addAll({
+              json["timestamp"]: DataTemperature(value: value["temperature"])
+            });
+            break;
+          case "Humidity":
+            dataList
+                .firstWhere((element) => element.values.first is DataHumidity)
+                .addAll({
+              json["timestamp"]: DataHumidity(value: value["humidity"])
+            });
+            break;
+          case "Pressure":
+            dataList
+                .firstWhere((element) => element.values.first is DataPressure)
+                .addAll({
+              json["timestamp"]: DataPressure(value: value["pressure"])
+            });
+            break;
+          case "Acceleration":
+            dataList
+                .firstWhere(
+                    (element) => element.values.first is DataAcceleration)
+                .addAll({
+              json["timestamp"]: DataAcceleration(
+                  value: Position(x: value["x"], y: value["y"], z: value["z"]))
+            });
+            break;
+          case "AngularVelocity":
+            dataList
+                .firstWhere(
+                    (element) => element.values.first is DataAngularVelocity)
+                .addAll({
+              json["timestamp"]: DataAngularVelocity(
+                  value: Rotation(
+                      yaw: value["yaw"],
+                      pitch: value["pitch"],
+                      roll: value["roll"]))
+            });
+            break;
+          default:
+            throw Exception("Invalid data type");
+        }
+      });
+    }
+  }
 
   factory DataList.fromBytes(List<int> bytes) {
     var decoded = cbor.decode(Uint8List.fromList(bytes));
@@ -51,13 +158,16 @@ class DataList {
             break;
           case "Temperature":
             dataList.add({
-              json["timestamp"]: DataTemperature(value: value["temperature"])});
+              json["timestamp"]: DataTemperature(value: value["temperature"])
+            });
             break;
           case "Humidity":
-            dataList.add({json["timestamp"]: DataHumidity(value: value["humidity"])});
+            dataList.add(
+                {json["timestamp"]: DataHumidity(value: value["humidity"])});
             break;
           case "Pressure":
-            dataList.add({json["timestamp"]: DataPressure(value: value["pressure"])});
+            dataList.add(
+                {json["timestamp"]: DataPressure(value: value["pressure"])});
             break;
           case "Acceleration":
             dataList.add({

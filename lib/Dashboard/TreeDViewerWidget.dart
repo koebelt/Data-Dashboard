@@ -4,7 +4,9 @@ import 'package:ditredi/ditredi.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 class TreeDViewerWidget extends StatefulWidget {
-  const TreeDViewerWidget({super.key});
+  const TreeDViewerWidget({super.key, this.rotation});
+
+  final Vector3? rotation;
 
   @override
   State<TreeDViewerWidget> createState() => _TreeDViewerWidgetState();
@@ -39,7 +41,7 @@ class _TreeDViewerWidgetState extends State<TreeDViewerWidget> {
   @override
   Widget build(BuildContext context) {
     Vector3 center = Vector3(0, 0, 0);
-    Vector3 rotation = Vector3(-1, 0, 0);
+    Vector3 rotation = widget.rotation ?? Vector3(-1, 0, 0);
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: Stack(
